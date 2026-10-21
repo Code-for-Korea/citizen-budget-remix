@@ -114,6 +114,37 @@ def main(src, dest):
         cat["items"].sort(key=lambda i: -i["amounts"]["2027"])
         cat["description"] = descriptions["categories"][cat["id"]]
 
+    # 정부 분류에 없는 칸. 정부안은 0원이고 시민이 금액을 직접 정한다.
+    # 관련 사업은 다른 중분류에 이미 들어 있으므로 금액 합계에 더하지 않고 설명으로만 보여 준다.
+    absent = []
+    for extra in descriptions.get("absent", []):
+        related = []
+        for keyword in extra["related"]:
+            found = [
+                dict(item, category=cat["name"])
+                for cat in ordered
+                for item in cat["items"]
+                if keyword in f"{item['name']} {item['detail']}"
+            ]
+            if len(found) != 1:
+                raise SystemExit(f"관련 사업 '{keyword}'가 {len(found)}건 찾아졌다. 정확히 1건이어야 한다.")
+            related += found
+        related.sort(key=lambda i: -i["amounts"]["2027"])
+        absent.append({
+            "id": extra["id"],
+            "group": extra["group"],
+            "name": extra["name"],
+            "input": "amount",
+            "max": extra["max"],
+            "step": extra["step"],
+            "amounts": dict.fromkeys(YEAR_COLUMNS.values(), 0),
+            "description": extra["description"],
+            "items": related,
+        })
+        if extra["group"] not in group_order:
+            group_order.append(extra["group"])
+    ordered += absent
+
     data = {
         "id": "ai-2027",
         "title": "모두의 AI 예산",
@@ -127,7 +158,10 @@ def main(src, dest):
     }
     Path(dest).write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     total = sum(c["amounts"]["2027"] for c in ordered)
-    print(f"{len(ordered)}개 중분류, {sum(len(c['items']) for c in ordered)}개 사업, 2027 합계 {total:,}백만원")
+    print(f"{len(ordered) - len(absent)}개 중분류, {sum(len(c['items']) for c in ordered if c not in absent)}개 사업, 2027 합계 {total:,}백만원")
+    for extra in absent:
+        related = sum(i["amounts"]["2027"] for i in extra["items"])
+        print(f"빈 칸 '{extra['name']}': 관련 사업 {len(extra['items'])}개, 2027 합계 {related:,}백만원")
 
 
 if __name__ == "__main__":

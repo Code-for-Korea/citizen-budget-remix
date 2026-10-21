@@ -1,11 +1,12 @@
 // 캠페인 데이터를 불러와 중분류별 조절 화면을 그린다.
-// 조절 값은 정부안 대비 퍼센트로 주소의 해시(#c=id:퍼센트,...)에 담아 공유한다.
+// 정부 분류의 칸은 정부안 대비 퍼센트로, 정부안에 없는 칸(input: 'amount')은 금액으로 조절한다.
+// 조절 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값은 퍼센트, 금액 칸은 억 원 단위다.
 
 const CAMPAIGN = 'campaigns/ai-2027/budget.json';
 const MAX_PERCENT = 500;
 const STEP = 5;
 
-const percents = new Map();
+const values = new Map();
 let data;
 
 function el(tag, props = {}, ...children) {
@@ -32,29 +33,46 @@ function signed(million) {
   return `${million > 0 ? '+' : '−'}${won(Math.abs(million))}`;
 }
 
+function isAmount(category) {
+  return category.input === 'amount';
+}
+
+function initial(category) {
+  return isAmount(category) ? 0 : 100;
+}
+
 function base(category) {
   return category.amounts[data.baseYear];
 }
 
 function mine(category) {
-  return Math.round((base(category) * percents.get(category.id)) / 100);
+  const value = values.get(category.id);
+  return isAmount(category) ? value : Math.round((base(category) * value) / 100);
+}
+
+function clamp(category, raw) {
+  const [max, step] = isAmount(category) ? [category.max, category.step] : [MAX_PERCENT, STEP];
+  return Math.min(max, Math.max(0, Math.round(raw / step) * step));
 }
 
 function readHash() {
-  for (const id of percents.keys()) percents.set(id, 100);
+  for (const category of data.categories) values.set(category.id, initial(category));
   const match = location.hash.match(/c=([^&]*)/);
   if (!match) return;
   for (const pair of decodeURIComponent(match[1]).split(',')) {
     const [id, value] = pair.split(':');
-    const percent = Number(value);
-    if (percents.has(id) && Number.isFinite(percent)) {
-      percents.set(id, Math.min(MAX_PERCENT, Math.max(0, Math.round(percent / STEP) * STEP)));
+    const category = data.categories.find((c) => c.id === id);
+    const number = Number(value);
+    if (category && Number.isFinite(number)) {
+      values.set(id, clamp(category, isAmount(category) ? number * 100 : number));
     }
   }
 }
 
 function writeHash() {
-  const changed = [...percents].filter(([, p]) => p !== 100).map(([id, p]) => `${id}:${p}`);
+  const changed = data.categories
+    .filter((c) => values.get(c.id) !== initial(c))
+    .map((c) => `${c.id}:${isAmount(c) ? values.get(c.id) / 100 : values.get(c.id)}`);
   const hash = changed.length ? `#c=${changed.join(',')}` : '';
   history.replaceState(null, '', location.pathname + location.search + hash);
 }
@@ -62,6 +80,10 @@ function writeHash() {
 function setChange(node, diff) {
   node.textContent = signed(diff);
   node.className = `change ${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}`;
+}
+
+function percentOf(part, whole) {
+  return whole ? ((part / whole) * 100).toFixed(1) : '0.0';
 }
 
 function update() {
@@ -72,27 +94,32 @@ function update() {
   setChange(document.getElementById('total-diff'), total - gov);
 
   for (const category of data.categories) {
-    const percent = percents.get(category.id);
     const card = document.getElementById(`cat-${category.id}`);
-    card.querySelector('input').value = percent;
-    card.querySelector('.mine').textContent = `${won(mine(category))} (${percent}%)`;
+    card.querySelector('input').value = values.get(category.id);
+    card.querySelector('.mine').textContent = isAmount(category)
+      ? won(mine(category))
+      : `${won(mine(category))} (${values.get(category.id)}%)`;
     card.querySelector('.share').textContent =
-      `전체 중 비중 ${((base(category) / gov) * 100).toFixed(1)}% → ${total ? ((mine(category) / total) * 100).toFixed(1) : '0.0'}%`;
+      `전체 중 비중 ${percentOf(base(category), gov)}% → ${percentOf(mine(category), total)}%`;
     setChange(card.querySelector('.change'), mine(category) - base(category));
   }
 
-  for (const group of data.groups) {
+  data.groups.forEach((group, index) => {
     const members = data.categories.filter((c) => c.group === group.name);
-    const node = document.getElementById(`group-total-${data.groups.indexOf(group)}`);
-    node.textContent = `정부안 ${won(members.reduce((s, c) => s + base(c), 0))} → 내 예산 ${won(members.reduce((s, c) => s + mine(c), 0))}`;
-  }
+    document.getElementById(`group-total-${index}`).textContent =
+      `정부안 ${won(members.reduce((s, c) => s + base(c), 0))} → 내 예산 ${won(members.reduce((s, c) => s + mine(c), 0))}`;
+  });
 }
 
 function itemTable(category) {
   const [prevYear] = data.years.slice(-2);
   const rows = category.items.map((item) =>
     el('tr', {},
-      el('td', {}, item.name, item.detail ? el('span', { className: 'detail', textContent: item.detail }) : null),
+      el('td', {},
+        item.name,
+        item.detail ? el('span', { className: 'detail', textContent: item.detail }) : null,
+        item.category ? el('span', { className: 'detail', textContent: `정부 분류: ${item.category}` }) : null,
+      ),
       el('td', { className: 'num', textContent: won(item.amounts[prevYear]) }),
       el('td', { className: 'num', textContent: won(item.amounts[data.baseYear]) }),
     ));
@@ -107,22 +134,34 @@ function itemTable(category) {
     ));
 }
 
+// 정부안에 없는 칸은 관련 사업이 다른 분야에 흩어져 있다는 점과 그 합계를 따로 밝힌다.
+function relatedNote(category) {
+  if (!isAmount(category)) return null;
+  const sum = category.items.reduce((s, i) => s + i.amounts[data.baseYear], 0);
+  const gov = data.categories.reduce((s, c) => s + base(c), 0);
+  return el('p', {},
+    el('strong', { textContent: `관련 사업 ${category.items.length}개를 모두 더해도 ${won(sum)}, ${data.baseLabel} 전체의 ${percentOf(sum, gov)}%입니다.` }));
+}
+
 function categoryCard(category) {
+  const amount = isAmount(category);
   const slider = el('input', {
     type: 'range',
     min: 0,
-    max: MAX_PERCENT,
-    step: STEP,
-    value: 100,
+    max: amount ? category.max : MAX_PERCENT,
+    step: amount ? category.step : STEP,
+    value: initial(category),
   });
-  slider.setAttribute('aria-label', `${category.name} 예산 (정부안 대비 퍼센트)`);
+  slider.setAttribute('aria-label', amount
+    ? `${category.name} 예산 (금액)`
+    : `${category.name} 예산 (정부안 대비 퍼센트)`);
   slider.addEventListener('input', () => {
-    percents.set(category.id, Number(slider.value));
+    values.set(category.id, Number(slider.value));
     update();
     writeHash();
   });
 
-  return el('article', { className: 'category', id: `cat-${category.id}` },
+  return el('article', { className: `category${amount ? ' absent' : ''}`, id: `cat-${category.id}` },
     el('div', { className: 'category-head' },
       el('h3', { textContent: category.name }),
       el('span', { className: 'amounts' },
@@ -134,13 +173,14 @@ function categoryCard(category) {
     ),
     slider,
     el('div', { className: 'scale' },
-      el('span', { textContent: '0%' }),
+      el('span', { textContent: amount ? '0원' : '0%' }),
       el('span', { className: 'share' }),
-      el('span', { textContent: `${MAX_PERCENT}%` }),
+      el('span', { textContent: amount ? won(category.max) : `${MAX_PERCENT}%` }),
     ),
     el('details', {},
-      el('summary', { textContent: `설명과 세부사업 ${category.items.length}개` }),
+      el('summary', { textContent: `설명과 ${amount ? '관련 사업' : '세부사업'} ${category.items.length}개` }),
       el('p', { textContent: category.description }),
+      relatedNote(category),
       itemTable(category),
     ),
   );
@@ -186,14 +226,13 @@ async function start() {
     document.querySelector('#groups .status').textContent = '예산 자료를 불러오지 못했습니다.';
     return;
   }
-  for (const category of data.categories) percents.set(category.id, 100);
   readHash();
   render();
   update();
 
   document.getElementById('share').addEventListener('click', share);
   document.getElementById('reset').addEventListener('click', () => {
-    for (const id of percents.keys()) percents.set(id, 100);
+    for (const category of data.categories) values.set(category.id, initial(category));
     update();
     writeHash();
     document.getElementById('share-status').textContent = '';

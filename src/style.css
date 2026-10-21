@@ -151,6 +151,12 @@ button.secondary {
   background: var(--surface);
 }
 
+/* 정부안에 없는 칸: 빈 칸이라는 점이 보이도록 점선 테두리 */
+.category.absent {
+  background: transparent;
+  border: 2px dashed var(--accent);
+}
+
 .category-head {
   display: flex;
   flex-wrap: wrap;
