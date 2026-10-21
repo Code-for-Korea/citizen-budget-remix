@@ -1,14 +1,24 @@
 :root {
   --bg: #ffffff;
+  --surface: #f6f6f4;
   --fg: #1a1a1a;
   --muted: #666666;
+  --line: #dddddd;
+  --accent: #2357d9;
+  --up: #b3261e;
+  --down: #1a7f4b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #121212;
+    --surface: #1e1e1e;
     --fg: #ededed;
     --muted: #9a9a9a;
+    --line: #333333;
+    --accent: #7ea2ff;
+    --up: #ff8a80;
+    --down: #6fd39b;
   }
 }
 
@@ -17,19 +27,212 @@
 }
 
 body {
-  margin: 0;
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 0 16px 64px;
   background: var(--bg);
   color: var(--fg);
   font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   line-height: 1.6;
 }
 
-main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 48px 16px;
+h1 {
+  margin: 48px 0 8px;
+  font-size: 2rem;
 }
 
-.status {
+h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.status,
+.muted {
+  color: var(--muted);
+}
+
+/* 합계: 스크롤해도 위에 붙어 있다 */
+.summary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 24px -16px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.summary dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+}
+
+.summary dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.summary dd {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .summary dl {
+    gap: 4px 16px;
+  }
+
+  .summary dd {
+    font-size: 0.95rem;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+button {
+  padding: 6px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  font: inherit;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--accent);
+}
+
+.share-status {
+  min-height: 1.2em;
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.share-status input {
+  width: 100%;
+  font: inherit;
+}
+
+.group {
+  margin: 40px 0;
+}
+
+.group > p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.group-total {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.category {
+  margin: 12px 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.category-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  align-items: baseline;
+}
+
+.amounts {
+  font-variant-numeric: tabular-nums;
+}
+
+.change.up {
+  color: var(--up);
+}
+
+.change.down {
+  color: var(--down);
+}
+
+input[type="range"] {
+  width: 100%;
+  margin: 12px 0 4px;
+  accent-color: var(--accent);
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+details {
+  margin-top: 8px;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+details p {
+  font-size: 0.9rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th,
+td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+th.num,
+td.num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+td .detail {
+  display: block;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
   color: var(--muted);
 }

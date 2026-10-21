@@ -7,11 +7,30 @@
   <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
-  <main id="app">
+  <header class="intro">
     <h1>모두의 AI 예산</h1>
-    <p>정부가 공개한 AI 예산을 읽고, 내가 짠 예산을 나눠 보세요.</p>
-    <p class="status">준비 중입니다.</p>
+    <p>과학기술정보통신부의 2027년 AI 예산 정부안은 지금 국회에서 심사 중입니다. 15개 분야의 금액을 내 생각대로 조절해 보고, 내가 짠 예산을 링크로 나눠 보세요.</p>
+  </header>
+
+  <section class="summary" aria-label="합계">
+    <dl>
+      <div><dt>정부안</dt><dd id="total-gov">-</dd></div>
+      <div><dt>내 예산</dt><dd id="total-mine">-</dd></div>
+      <div><dt>차이</dt><dd id="total-diff">-</dd></div>
+    </dl>
+    <div class="actions">
+      <button type="button" id="share">링크 복사</button>
+      <button type="button" id="reset" class="secondary">처음으로</button>
+    </div>
+    <p class="share-status" id="share-status" role="status"></p>
+  </section>
+
+  <main id="groups">
+    <p class="status">예산 항목을 불러오고 있습니다.</p>
   </main>
+
+  <footer id="source"></footer>
+
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

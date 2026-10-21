@@ -26,12 +26,28 @@ python3 -m http.server 8000
 
 그다음 브라우저에서 <http://localhost:8000> 을 엽니다.
 
+## 사용법
+
+- 분야(중분류)마다 슬라이더로 정부안 대비 0~500%를 조절합니다. 합계와 정부안과의 차이가 위에 표시됩니다.
+- 「설명과 세부사업」을 펼치면 분야 설명과 그 분야에 속한 세부사업별 금액을 볼 수 있습니다.
+- 「링크 복사」를 누르면 조절한 값이 담긴 주소(`#c=분야id:퍼센트,...`)가 복사됩니다. 이 링크를 열면 같은 예산이 그대로 보입니다.
+
 ## 구조
 
 ```text
-index.html        진입 페이지
-src/              화면 동작(JavaScript)과 스타일(CSS)
-campaigns/        캠페인별 예산 항목 데이터
+index.html                      진입 페이지
+src/                            화면 동작(JavaScript)과 스타일(CSS)
+campaigns/ai-2027/budget.json   「모두의 AI 예산」 데이터 (변환 스크립트가 만든다)
+campaigns/ai-2027/descriptions.json  출처·분류 설명 (사람이 쓴다)
+scripts/xlsx_to_json.py         원자료 엑셀을 budget.json으로 변환
+```
+
+## 데이터 갱신
+
+원자료는 과학기술정보통신부가 국회의원실 자료요구에 제출한 「AI 예산 현황」 엑셀입니다. 원자료 파일은 저장소에 넣지 않습니다. 설명을 고치거나 원자료가 바뀌면 다시 변환합니다(표준 라이브러리만 씁니다).
+
+```bash
+python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 ```
 
 ## 배포
