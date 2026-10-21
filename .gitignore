@@ -1,0 +1,23 @@
+# 비밀정보·로컬 설정
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 의존성·빌드 산출물
+node_modules/
+dist/
+build/
+.cache/
+
+# 로그
+*.log
+npm-debug.log*
+
+# OS·에디터
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
