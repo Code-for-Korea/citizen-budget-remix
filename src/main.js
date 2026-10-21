@@ -50,6 +50,23 @@ function mine(category) {
   return isAmount(category) ? value : Math.round((base(category) * value) / 100);
 }
 
+function sum(categories, amount) {
+  return categories.reduce((s, c) => s + amount(c), 0);
+}
+
+function members(group) {
+  return data.categories.filter((c) => c.group === group.name);
+}
+
+// 대분류 순서대로 고정된 색을 쓴다(style.css의 --series-N).
+function groupColor(group) {
+  return `var(--series-${data.groups.indexOf(group) + 1})`;
+}
+
+function isAbsentGroup(group) {
+  return members(group).every(isAmount);
+}
+
 function clamp(category, raw) {
   const [max, step] = isAmount(category) ? [category.max, category.step] : [MAX_PERCENT, STEP];
   return Math.min(max, Math.max(0, Math.round(raw / step) * step));
@@ -86,12 +103,40 @@ function percentOf(part, whole) {
   return whole ? ((part / whole) * 100).toFixed(1) : '0.0';
 }
 
+// 가장 많이 늘리고 줄인 분야를 한 줄로 알려 준다.
+function highlights() {
+  const diffs = data.categories.map((c) => ({ c, diff: mine(c) - base(c) }));
+  const up = diffs.reduce((a, b) => (b.diff > a.diff ? b : a), { diff: 0 });
+  const down = diffs.reduce((a, b) => (b.diff < a.diff ? b : a), { diff: 0 });
+  const parts = [];
+  if (Math.round(up.diff / 100)) parts.push(`가장 늘린 분야: ${up.c.name} ${signed(up.diff)}`);
+  if (Math.round(down.diff / 100)) parts.push(`가장 줄인 분야: ${down.c.name} ${signed(down.diff)}`);
+  return parts.length ? parts.join(' · ') : '아직 바꾼 분야가 없습니다. 아래 슬라이더를 움직여 보세요.';
+}
+
+function updateBars(gov, total) {
+  const scale = Math.max(gov, total);
+  for (const [id, amount, whole] of [['bar-gov', base, gov], ['bar-mine', mine, total]]) {
+    const fill = document.getElementById(id);
+    fill.style.width = `${scale ? (whole / scale) * 100 : 0}%`;
+    data.groups.forEach((group, index) => {
+      const value = sum(members(group), amount);
+      const seg = fill.children[index];
+      seg.style.flexGrow = value;
+      seg.hidden = value === 0;
+      seg.dataset.tip = `${seg.dataset.label} · ${group.name} ${won(value)} (${percentOf(value, whole)}%)`;
+    });
+  }
+}
+
 function update() {
-  const gov = data.categories.reduce((sum, c) => sum + base(c), 0);
-  const total = data.categories.reduce((sum, c) => sum + mine(c), 0);
+  const gov = sum(data.categories, base);
+  const total = sum(data.categories, mine);
   document.getElementById('total-gov').textContent = won(gov);
   document.getElementById('total-mine').textContent = won(total);
   setChange(document.getElementById('total-diff'), total - gov);
+  document.getElementById('highlights').textContent = highlights();
+  updateBars(gov, total);
 
   for (const category of data.categories) {
     const card = document.getElementById(`cat-${category.id}`);
@@ -105,9 +150,8 @@ function update() {
   }
 
   data.groups.forEach((group, index) => {
-    const members = data.categories.filter((c) => c.group === group.name);
     document.getElementById(`group-total-${index}`).textContent =
-      `정부안 ${won(members.reduce((s, c) => s + base(c), 0))} → 내 예산 ${won(members.reduce((s, c) => s + mine(c), 0))}`;
+      `정부안 ${won(sum(members(group), base))} → 내 예산 ${won(sum(members(group), mine))}`;
   });
 }
 
@@ -137,10 +181,10 @@ function itemTable(category) {
 // 정부안에 없는 칸은 관련 사업이 다른 분야에 흩어져 있다는 점과 그 합계를 따로 밝힌다.
 function relatedNote(category) {
   if (!isAmount(category)) return null;
-  const sum = category.items.reduce((s, i) => s + i.amounts[data.baseYear], 0);
-  const gov = data.categories.reduce((s, c) => s + base(c), 0);
+  const related = category.items.reduce((s, i) => s + i.amounts[data.baseYear], 0);
+  const gov = sum(data.categories, base);
   return el('p', {},
-    el('strong', { textContent: `관련 사업 ${category.items.length}개를 모두 더해도 ${won(sum)}, ${data.baseLabel} 전체의 ${percentOf(sum, gov)}%입니다.` }));
+    el('strong', { textContent: `관련 사업 ${category.items.length}개를 모두 더해도 ${won(related)}, ${data.baseLabel} 전체의 ${percentOf(related, gov)}%입니다.` }));
 }
 
 function categoryCard(category) {
@@ -161,6 +205,9 @@ function categoryCard(category) {
     writeHash();
   });
 
+  const mark = amount ? null : el('span', { className: 'gov-mark', textContent: '정부안' });
+  mark?.style.setProperty('--at', 100 / MAX_PERCENT);
+
   return el('article', { className: `category${amount ? ' absent' : ''}`, id: `cat-${category.id}` },
     el('div', { className: 'category-head' },
       el('h3', { textContent: category.name }),
@@ -171,7 +218,7 @@ function categoryCard(category) {
         el('span', { className: 'change' }),
       ),
     ),
-    slider,
+    el('div', { className: 'slider' }, mark, slider),
     el('div', { className: 'scale' },
       el('span', { textContent: amount ? '0원' : '0%' }),
       el('span', { className: 'share' }),
@@ -186,18 +233,89 @@ function categoryCard(category) {
   );
 }
 
+// 맨 위 핵심 숫자: 가장 큰 사업 하나의 비중, 안전·신뢰 비중, 정부안에 없는 칸.
+function renderFacts() {
+  const gov = sum(data.categories, base);
+  const items = data.categories.filter((c) => !isAmount(c)).flatMap((c) => c.items);
+  const top = items.reduce((a, b) => (b.amounts[data.baseYear] > a.amounts[data.baseYear] ? b : a));
+  const safety = data.groups.find((g) => g.name === '안전·신뢰');
+  const absent = data.categories.find(isAmount);
+
+  const facts = [
+    [`${Math.round((top.amounts[data.baseYear] / gov) * 100)}%`,
+      `「${top.detail || top.name}」 사업 하나가 ${data.baseLabel} 전체에서 차지하는 비중`,
+      data.groups.find((g) => g.name === data.categories.find((c) => c.items.includes(top)).group)],
+    safety && [`${percentOf(sum(members(safety), base), gov)}%`,
+      `안전·신뢰 분야 전체(${won(sum(members(safety), base))})의 비중`, safety],
+    absent && ['0원', `정부 분류에 '${absent.name}' 칸이 없습니다`,
+      data.groups.find((g) => g.name === absent.group)],
+  ].filter(Boolean);
+
+  document.getElementById('facts').replaceChildren(...facts.map(([value, label, group]) => {
+    const card = el('div', { className: 'fact' }, el('strong', { textContent: value }), el('span', { textContent: label }));
+    card.style.setProperty('--fact-color', groupColor(group));
+    return card;
+  }));
+}
+
+function renderLegend() {
+  document.getElementById('legend').replaceChildren(...data.groups.map((group) => {
+    const item = el('li', { className: isAbsentGroup(group) ? 'absent' : '', textContent: group.name });
+    item.style.setProperty('--group-color', groupColor(group));
+    return item;
+  }));
+}
+
+function renderBars() {
+  for (const [id, label] of [['bar-gov', '정부안'], ['bar-mine', '내 예산']]) {
+    document.getElementById(id).replaceChildren(...data.groups.map((group) => {
+      const seg = el('div', { className: `seg${isAbsentGroup(group) ? ' absent' : ''}` });
+      seg.dataset.label = label;
+      seg.style.setProperty('--group-color', groupColor(group));
+      return seg;
+    }));
+  }
+}
+
+// 막대 조각에 마우스를 올리거나 누르면 금액을 보여 준다.
+function setupTooltip() {
+  const tip = document.getElementById('tip');
+  const show = (event) => {
+    const seg = event.target.closest('.seg');
+    if (!seg) {
+      tip.hidden = true;
+      return;
+    }
+    tip.textContent = seg.dataset.tip;
+    tip.hidden = false;
+    const x = Math.min(event.clientX + 12, innerWidth - tip.offsetWidth - 8);
+    tip.style.left = `${Math.max(8, x)}px`;
+    tip.style.top = `${event.clientY + 16}px`;
+  };
+  document.querySelector('.bars').addEventListener('pointermove', show);
+  document.querySelector('.bars').addEventListener('pointerdown', show);
+  document.querySelector('.bars').addEventListener('pointerleave', () => { tip.hidden = true; });
+}
+
 function render() {
+  renderFacts();
+  renderLegend();
+  renderBars();
+
   const main = document.getElementById('groups');
-  main.replaceChildren(...data.groups.map((group, index) =>
-    el('section', { className: 'group' },
+  main.replaceChildren(...data.groups.map((group, index) => {
+    const section = el('section', { className: `group${isAbsentGroup(group) ? ' absent' : ''}` },
       el('h2', { textContent: group.name }),
       el('p', {},
         group.description,
         el('br'),
         el('span', { className: 'group-total', id: `group-total-${index}` }),
       ),
-      ...data.categories.filter((c) => c.group === group.name).map(categoryCard),
-    )));
+      ...members(group).map(categoryCard),
+    );
+    section.style.setProperty('--group-color', groupColor(group));
+    return section;
+  }));
 
   const { source } = data;
   document.getElementById('source').replaceChildren(
@@ -229,6 +347,7 @@ async function start() {
   readHash();
   render();
   update();
+  setupTooltip();
 
   document.getElementById('share').addEventListener('click', share);
   document.getElementById('reset').addEventListener('click', () => {
