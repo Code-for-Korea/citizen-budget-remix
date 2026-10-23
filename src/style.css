@@ -166,14 +166,26 @@ h3 {
   color: var(--fg);
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .start {
   display: inline-block;
   padding: 8px 18px;
+  border: 1px solid var(--accent);
   border-radius: 6px;
   background: var(--accent);
   color: var(--bg);
   font-weight: 600;
   text-decoration: none;
+}
+
+.start.secondary {
+  background: transparent;
+  color: var(--accent);
 }
 
 /* 핵심 숫자 카드 */
@@ -387,6 +399,22 @@ button.secondary {
   color: var(--accent);
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 글자처럼 보이는 버튼: 분야 카드의 '이 분야에 의문 남기기' */
+button.link {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
 .share-status:empty {
   display: none;
 }
@@ -546,6 +574,214 @@ td .detail {
   color: var(--bg);
   font-size: 0.8rem;
   pointer-events: none;
+}
+
+/* 시민 심의 게시판: 의문은 GitHub의 이슈, 구성안은 풀 리퀘스트처럼 목록에 쌓인다 */
+.board {
+  margin: 56px 0 0;
+}
+
+/* 위에 붙어 있는 합계 영역에 가리지 않게 스크롤한다(--summary-height는 main.js가 잰다) */
+.board,
+.post {
+  scroll-margin-top: calc(var(--summary-height, 0px) + 16px);
+}
+
+.board h2 {
+  font-size: 1.5rem;
+}
+
+.board-intro {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.board-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tabs button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.tabs button[aria-selected="true"] {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.tabs .count {
+  display: inline-block;
+  min-width: 1.6em;
+  margin-left: 2px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--line);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.board-status:empty {
+  display: none;
+}
+
+.board-status {
+  margin: 12px 0;
+  font-size: 0.9rem;
+}
+
+.posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post {
+  display: flex;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.post-icon {
+  flex: 0 0 22px;
+  height: 22px;
+  margin-top: 2px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.post.proposal .post-icon {
+  border-radius: 6px;
+}
+
+.post details {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.post summary {
+  color: var(--fg);
+  list-style: none;
+}
+
+.post summary::-webkit-details-marker {
+  display: none;
+}
+
+.post-title {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.post summary:hover .post-title {
+  color: var(--accent);
+}
+
+.post-meta,
+.post-budget {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.post-budget {
+  font-variant-numeric: tabular-nums;
+}
+
+.post-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.post .actions {
+  flex-wrap: wrap;
+}
+
+.post .actions button {
+  white-space: nowrap;
+}
+
+dialog {
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+dialog h2 {
+  margin-bottom: 8px;
+}
+
+dialog label {
+  display: block;
+  margin: 12px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+dialog input,
+dialog select,
+dialog textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 400;
+}
+
+dialog .hint,
+dialog .note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+dialog .status:empty {
+  display: none;
+}
+
+dialog .status {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+#post-form[data-kind="proposal"] .category-field {
+  display: none;
 }
 
 footer {

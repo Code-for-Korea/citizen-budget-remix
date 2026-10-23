@@ -1,6 +1,10 @@
 // 캠페인 데이터를 불러와 중분류별 조절 화면을 그린다.
 // 정부 분류의 칸은 정부안 대비 퍼센트로, 정부안에 없는 칸(input: 'amount')은 금액으로 조절한다.
 // 조절 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값은 퍼센트, 금액 칸은 억 원 단위다.
+// 같은 형식의 문자열을 시민 심의 게시판의 구성안에도 저장한다.
+
+import { el } from './dom.js';
+import { setupBoard } from './board.js';
 
 const CAMPAIGN = 'campaigns/ai-2027/budget.json';
 const MAX_PERCENT = 500;
@@ -9,13 +13,7 @@ const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
 const values = new Map();
 let data;
-
-function el(tag, props = {}, ...children) {
-  const node = document.createElement(tag);
-  Object.assign(node, props);
-  node.append(...children.filter((c) => c !== null && c !== undefined));
-  return node;
-}
+let board;
 
 // 백만원 단위 금액을 "6조 1,490억"처럼 읽기 쉽게 바꾼다.
 function won(million) {
@@ -46,8 +44,8 @@ function base(category) {
   return category.amounts[data.baseYear];
 }
 
-function mine(category) {
-  const value = values.get(category.id);
+function mine(category, budget = values) {
+  const value = budget.get(category.id);
   return isAmount(category) ? value : Math.round((base(category) * value) / 100);
 }
 
@@ -73,26 +71,37 @@ function clamp(category, raw) {
   return Math.min(max, Math.max(0, Math.round(raw / step) * step));
 }
 
-function readHash() {
-  for (const category of data.categories) values.set(category.id, initial(category));
-  const match = location.hash.match(/c=([^&]*)/);
-  if (!match) return;
+// "c=id:값,..." 문자열(주소의 해시나 구성안)을 분야별 조절 값으로 읽는다.
+function parseBudget(text) {
+  const budget = new Map(data.categories.map((c) => [c.id, initial(c)]));
+  const match = text.match(/c=([^&]*)/);
+  if (!match) return budget;
   for (const pair of decodeURIComponent(match[1]).split(',')) {
     const [id, value] = pair.split(':');
     const category = data.categories.find((c) => c.id === id);
     const number = Number(value);
     if (category && Number.isFinite(number)) {
-      values.set(id, clamp(category, isAmount(category) ? number * 100 : number));
+      budget.set(id, clamp(category, isAmount(category) ? number * 100 : number));
     }
   }
+  return budget;
+}
+
+// 정부안에서 바꾼 분야만 담는다. 바꾼 게 없으면 빈 문자열이다.
+function budgetText(budget = values) {
+  const changed = data.categories
+    .filter((c) => budget.get(c.id) !== initial(c))
+    .map((c) => `${c.id}:${isAmount(c) ? budget.get(c.id) / 100 : budget.get(c.id)}`);
+  return changed.length ? `c=${changed.join(',')}` : '';
+}
+
+function readHash() {
+  for (const [id, value] of parseBudget(location.hash)) values.set(id, value);
 }
 
 function writeHash() {
-  const changed = data.categories
-    .filter((c) => values.get(c.id) !== initial(c))
-    .map((c) => `${c.id}:${isAmount(c) ? values.get(c.id) / 100 : values.get(c.id)}`);
-  const hash = changed.length ? `#c=${changed.join(',')}` : '';
-  history.replaceState(null, '', location.pathname + location.search + hash);
+  const text = budgetText();
+  history.replaceState(null, '', location.pathname + location.search + (text ? `#${text}` : ''));
 }
 
 function setChange(node, diff) {
@@ -104,15 +113,22 @@ function percentOf(part, whole) {
   return whole ? ((part / whole) * 100).toFixed(1) : '0.0';
 }
 
-// 가장 많이 늘리고 줄인 분야를 한 줄로 알려 준다.
-function highlights() {
-  const diffs = data.categories.map((c) => ({ c, diff: mine(c) - base(c) }));
+// 가장 많이 늘리고 줄인 분야를 알려 준다. 바꾼 분야가 없으면 빈 배열이다.
+function highlights(budget = values) {
+  const diffs = data.categories.map((c) => ({ c, diff: mine(c, budget) - base(c) }));
   const up = diffs.reduce((a, b) => (b.diff > a.diff ? b : a), { diff: 0 });
   const down = diffs.reduce((a, b) => (b.diff < a.diff ? b : a), { diff: 0 });
   const parts = [];
   if (Math.round(up.diff / 100)) parts.push(`가장 늘린 분야: ${up.c.name} ${signed(up.diff)}`);
   if (Math.round(down.diff / 100)) parts.push(`가장 줄인 분야: ${down.c.name} ${signed(down.diff)}`);
-  return parts.length ? parts.join(' · ') : '아직 바꾼 분야가 없습니다. 아래 슬라이더를 움직여 보세요.';
+  return parts;
+}
+
+// 구성안 한 줄 요약: 합계가 얼마나 달라졌고 어느 분야를 가장 바꿨는지.
+function summarize(text) {
+  const budget = parseBudget(text);
+  const diff = sum(data.categories, (c) => mine(c, budget)) - sum(data.categories, base);
+  return [`합계 ${signed(diff)}`, ...highlights(budget)].join(' · ');
 }
 
 function updateBars(gov, total) {
@@ -136,7 +152,8 @@ function update() {
   document.getElementById('total-gov').textContent = won(gov);
   document.getElementById('total-mine').textContent = won(total);
   setChange(document.getElementById('total-diff'), total - gov);
-  document.getElementById('highlights').textContent = highlights();
+  document.getElementById('highlights').textContent =
+    highlights().join(' · ') || '아직 바꾼 분야가 없습니다. 아래 슬라이더를 움직여 보세요.';
   updateBars(gov, total);
 
   for (const category of data.categories) {
@@ -230,6 +247,12 @@ function categoryCard(category) {
       el('p', { textContent: category.description }),
       relatedNote(category),
       itemTable(category),
+      el('button', {
+        type: 'button',
+        className: 'link',
+        textContent: '이 분야에 의문 남기기',
+        onclick: () => board.ask(category.id),
+      }),
     ),
   );
 }
@@ -400,15 +423,32 @@ async function start() {
   render();
   update();
   setupTooltip();
+  const summary = document.getElementById('summary');
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--summary-height', `${summary.offsetHeight}px`);
+  }).observe(summary);
+  board = setupBoard({
+    campaign: data.id,
+    categories: data.categories,
+    currentBudget: () => budgetText(),
+    summarize,
+    loadBudget: (text) => {
+      location.hash = text;
+      document.getElementById('summary').scrollIntoView();
+    },
+  });
 
   document.getElementById('share').addEventListener('click', share);
+  document.getElementById('propose').addEventListener('click', () => board.propose());
   // 주소의 해시에 조절 값이 담기므로, 앵커 이동 대신 스크롤만 한다.
-  document.querySelector('.start').addEventListener('click', (event) => {
-    event.preventDefault();
-    document.querySelector('.summary').scrollIntoView({
-      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+  for (const link of document.querySelectorAll('.start')) {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      document.querySelector(link.getAttribute('href')).scrollIntoView({
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
     });
-  });
+  }
   document.getElementById('reset').addEventListener('click', () => {
     for (const category of data.categories) values.set(category.id, initial(category));
     update();

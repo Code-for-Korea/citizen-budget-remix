@@ -20,11 +20,14 @@
       <ul class="legend" id="legend" aria-label="분야별 색과 칸 수"></ul>
     </figure>
 
-    <a class="start" href="#groups">내 예산 짜러 가기 ↓</a>
+    <div class="hero-actions">
+      <a class="start" href="#summary">내 예산 짜러 가기 ↓</a>
+      <a class="start secondary" href="#board">의문·구성안 보기</a>
+    </div>
     <div class="facts" id="facts"></div>
   </header>
 
-  <section class="summary" aria-label="합계">
+  <section class="summary" id="summary" aria-label="합계">
     <dl>
       <div><dt>정부안</dt><dd id="total-gov">-</dd></div>
       <div><dt>내 예산</dt><dd id="total-mine">-</dd></div>
@@ -37,6 +40,7 @@
     <p class="highlights" id="highlights"></p>
     <div class="actions">
       <button type="button" id="share">링크 복사</button>
+      <button type="button" id="propose" class="secondary">구성안 내기</button>
       <button type="button" id="reset" class="secondary">처음으로</button>
     </div>
     <p class="share-status" id="share-status" role="status"></p>
@@ -45,6 +49,37 @@
   <main id="groups">
     <p class="status">예산 항목을 불러오고 있습니다.</p>
   </main>
+
+  <section class="board" id="board" aria-labelledby="board-title">
+    <h2 id="board-title">시민 심의 게시판</h2>
+    <p class="board-intro">예산을 보다 생긴 의문을 남기거나, 내가 짠 예산을 구성안으로 내 보세요. 남긴 글은 목록에 쌓여 누구나 읽을 수 있습니다. 다른 사람의 구성안을 불러와 고친 뒤 새 구성안으로 낼 수도 있습니다.</p>
+    <div class="board-bar">
+      <div class="tabs" role="tablist" aria-label="글 종류">
+        <button type="button" role="tab" data-kind="question" aria-selected="true">의문 <span class="count"></span></button>
+        <button type="button" role="tab" data-kind="proposal" aria-selected="false">구성안 <span class="count"></span></button>
+      </div>
+      <button type="button" id="new-post">의문 남기기</button>
+    </div>
+    <p class="status board-status" id="board-status" role="status"></p>
+    <ol class="posts" id="posts"></ol>
+  </section>
+
+  <dialog id="post-dialog" aria-labelledby="post-dialog-title">
+    <form id="post-form" novalidate>
+      <h2 id="post-dialog-title"></h2>
+      <p class="hint" id="post-hint"></p>
+      <label>제목 <input name="title" maxlength="100" required></label>
+      <label class="category-field">분야 <select name="category_id"><option value="">예산 전체</option></select></label>
+      <label>내용 <textarea name="body" rows="6" maxlength="4000"></textarea></label>
+      <label>이름(별명) <input name="author_name" maxlength="30" autocomplete="nickname" required></label>
+      <p class="note">로그인 없이 씁니다. 내 글은 이 브라우저에서만 고치거나 지울 수 있습니다. 연락처 같은 개인정보는 적지 마세요.</p>
+      <p class="status" id="post-status" role="status"></p>
+      <div class="actions">
+        <button type="submit">올리기</button>
+        <button type="button" class="secondary" id="post-cancel">취소</button>
+      </div>
+    </form>
+  </dialog>
 
   <footer id="source"></footer>
 
