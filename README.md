@@ -80,7 +80,11 @@ python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 3. Authentication → Sign In / Providers에서 「Allow anonymous sign-ins」를 켭니다.
 4. Project Settings → API Keys에서 publishable 키(예전 프로젝트는 anon 키)를 복사해, 프로젝트 주소와 함께 `src/config.js`에 넣습니다. 이 키는 공개해도 되는 키입니다. secret(service_role) 키는 절대 넣지 마세요.
 
+운영 중인 프로젝트는 `citizen-budget`(peacecode 조직)이며 주소와 키가 `src/config.js`에 들어 있습니다.
+
 권한 규칙은 SQL에 있습니다. 누구나 목록(`posts_public` 뷰)을 읽고, 익명 세션을 포함해 로그인한 사람만 글을 씁니다. 자기 글만 고치고 지울 수 있으며, 작성자 id는 공개하지 않습니다. 같은 세션은 10분에 5개까지 쓸 수 있습니다.
+
+Supabase의 보안 점검(Advisors)은 `posts_public`을 「Security Definer View」로 표시합니다. 작성자 id를 읽을 권한 없이 내 글인지(`mine`)를 계산하려고 일부러 그렇게 만든 뷰이며, 숨긴 글은 뷰 안에서 직접 뺍니다.
 
 부적절한 글은 Table Editor에서 `posts` 표의 `hidden`을 `true`로 바꾸면 목록에서 사라집니다. 스팸이 늘면 Authentication의 익명 가입 횟수 제한을 낮추거나 CAPTCHA를 켜는 것을 고려하세요.
 
@@ -94,9 +98,9 @@ python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 
 | 이름 | 종류 | 값 |
 | --- | --- | --- |
-| `budget` | CNAME | `peace-code.github.io` |
+| `budget` | CNAME | `code-for-korea.github.io` |
 
-레코드가 퍼진 뒤 저장소 Settings → Pages에서 사용자 도메인이 `budget.codefor.kr`로 잡혔는지 확인하고 「Enforce HTTPS」를 켭니다.
+레코드가 퍼진 뒤 저장소 Settings → Pages에서 사용자 도메인이 `budget.codefor.kr`로 잡혔는지 확인하고 「Enforce HTTPS」를 켭니다. 다른 계정이 이 하위 도메인을 가져가지 못하도록 Code-for-Korea 조직의 Settings → Pages → Verified domains에서 `codefor.kr`을 확인해 두는 것을 권합니다.
 
 ## 라이선스
 
