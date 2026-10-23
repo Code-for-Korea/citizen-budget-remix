@@ -3,15 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>모두의 AI 예산</title>
+  <title>모두의 AI 예산 심의</title>
+  <meta name="description" content="국회가 심사하는 AI 예산, 시민도 직접 나눠 보고 따져 봅니다.">
   <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
   <header class="intro">
-    <h1>모두의 AI 예산</h1>
-    <p>과학기술정보통신부의 2027년 AI 예산 정부안은 지금 국회에서 심사 중입니다. 15개 분야의 금액을 내 생각대로 조절해 보고, 정부안에 없는 '민주적 AI 거버넌스' 칸도 채워 보세요. 내가 짠 예산은 링크로 나눌 수 있습니다.</p>
+    <p class="eyebrow">2027년 정부안 · 국회 심사 중</p>
+    <h1>모두의 AI 예산 <span class="stamp">심의</span></h1>
+    <p class="tagline">국회가 심사하는 AI 예산, 시민도 직접 나눠 보고 따져 봅니다.</p>
+    <p>과학기술정보통신부의 2027년 AI 예산 정부안을 15개 분야로 나눴습니다. 금액을 내 생각대로 조절해 보고, 정부안에 없는 '민주적 AI 거버넌스' 칸도 채워 보세요. 내가 짠 예산은 링크로 나눌 수 있습니다.</p>
+
+    <figure class="waffle-figure">
+      <figcaption id="waffle-caption"></figcaption>
+      <div class="waffle" id="waffle" role="img"></div>
+      <ul class="legend" id="legend" aria-label="분야별 색과 칸 수"></ul>
+    </figure>
+
+    <a class="start" href="#groups">내 예산 짜러 가기 ↓</a>
     <div class="facts" id="facts"></div>
-    <ul class="legend" id="legend" aria-label="분야별 색"></ul>
   </header>
 
   <section class="summary" aria-label="합계">

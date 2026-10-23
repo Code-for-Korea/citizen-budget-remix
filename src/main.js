@@ -5,6 +5,7 @@
 const CAMPAIGN = 'campaigns/ai-2027/budget.json';
 const MAX_PERCENT = 500;
 const STEP = 5;
+const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
 const values = new Map();
 let data;
@@ -258,9 +259,57 @@ function renderFacts() {
   }));
 }
 
+// 분야별 칸 수. 칸 수 합계가 정부안 합계의 칸 수와 맞도록 나머지가 큰 분야부터 한 칸씩 더 준다.
+let cellCounts;
+function cells(group) {
+  if (!cellCounts) {
+    const exact = data.groups.map((g) => sum(members(g), base) / CELL);
+    const counts = exact.map(Math.floor);
+    const left = Math.round(sum(data.categories, base) / CELL) - counts.reduce((s, n) => s + n, 0);
+    exact.map((x, i) => i).sort((i, j) => (exact[j] % 1) - (exact[i] % 1))
+      .slice(0, left).forEach((i) => { counts[i] += 1; });
+    cellCounts = new Map(data.groups.map((g, i) => [g, counts[i]]));
+  }
+  return cellCounts.get(group);
+}
+
+// 정부안에 없는 칸은 대분류 이름 대신 그 칸의 이름을 보여 준다.
+function groupLabel(group) {
+  return isAbsentGroup(group) ? members(group).map((c) => c.name).join(', ') : group.name;
+}
+
+// 정부안 전체를 100억 원짜리 칸으로 쪼개 분야 색으로 칠한다. 정부안에 없는 칸은 점선 빈칸 하나로 남긴다.
+function renderWaffle() {
+  const gov = sum(data.categories, base);
+  const total = sum(data.groups, cells);
+  let index = 0;
+  const nodes = data.groups.flatMap((group) => {
+    const absent = isAbsentGroup(group);
+    const tip = `${groupLabel(group)} ${won(sum(members(group), base))} · ${cells(group)}칸`;
+    return Array.from({ length: absent ? 1 : cells(group) }, () => {
+      const cell = el('span', { className: `cell${absent ? ' absent' : ''}` });
+      cell.dataset.tip = tip;
+      cell.style.setProperty('--group-color', groupColor(group));
+      cell.style.setProperty('--i', index++);
+      return cell;
+    });
+  });
+  const waffle = document.getElementById('waffle');
+  waffle.replaceChildren(...nodes);
+  waffle.setAttribute('aria-label', data.groups
+    .map((group) => `${groupLabel(group)} ${cells(group)}칸`).join(', '));
+
+  const absent = data.categories.find(isAmount);
+  document.getElementById('waffle-caption').replaceChildren(
+    el('strong', { textContent: `정부안 ${won(gov)} 원을 100억 원짜리 칸 ${total.toLocaleString('ko-KR')}개로 나눠 보면` }),
+    absent ? el('span', { textContent: `맨 끝 점선 칸이 정부안에 없는 '${absent.name}'입니다. 칸에 손가락이나 마우스를 올려 보세요.` }) : null,
+  );
+}
+
 function renderLegend() {
   document.getElementById('legend').replaceChildren(...data.groups.map((group) => {
-    const item = el('li', { className: isAbsentGroup(group) ? 'absent' : '', textContent: group.name });
+    const item = el('li', { className: isAbsentGroup(group) ? 'absent' : '' },
+      groupLabel(group), ' ', el('span', { className: 'count', textContent: `${cells(group)}칸` }));
     item.style.setProperty('--group-color', groupColor(group));
     return item;
   }));
@@ -277,27 +326,30 @@ function renderBars() {
   }
 }
 
-// 막대 조각에 마우스를 올리거나 누르면 금액을 보여 준다.
+// 막대 조각이나 칸에 마우스를 올리거나 누르면 금액을 보여 준다.
 function setupTooltip() {
   const tip = document.getElementById('tip');
   const show = (event) => {
-    const seg = event.target.closest('.seg');
-    if (!seg) {
+    const mark = event.target.closest('[data-tip]');
+    if (!mark) {
       tip.hidden = true;
       return;
     }
-    tip.textContent = seg.dataset.tip;
+    tip.textContent = mark.dataset.tip;
     tip.hidden = false;
     const x = Math.min(event.clientX + 12, innerWidth - tip.offsetWidth - 8);
     tip.style.left = `${Math.max(8, x)}px`;
     tip.style.top = `${event.clientY + 16}px`;
   };
-  document.querySelector('.bars').addEventListener('pointermove', show);
-  document.querySelector('.bars').addEventListener('pointerdown', show);
-  document.querySelector('.bars').addEventListener('pointerleave', () => { tip.hidden = true; });
+  for (const area of document.querySelectorAll('.bars, .waffle')) {
+    area.addEventListener('pointermove', show);
+    area.addEventListener('pointerdown', show);
+    area.addEventListener('pointerleave', () => { tip.hidden = true; });
+  }
 }
 
 function render() {
+  renderWaffle();
   renderFacts();
   renderLegend();
   renderBars();
@@ -350,6 +402,13 @@ async function start() {
   setupTooltip();
 
   document.getElementById('share').addEventListener('click', share);
+  // 주소의 해시에 조절 값이 담기므로, 앵커 이동 대신 스크롤만 한다.
+  document.querySelector('.start').addEventListener('click', (event) => {
+    event.preventDefault();
+    document.querySelector('.summary').scrollIntoView({
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
+  });
   document.getElementById('reset').addEventListener('click', () => {
     for (const category of data.categories) values.set(category.id, initial(category));
     update();

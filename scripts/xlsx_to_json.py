@@ -147,7 +147,7 @@ def main(src, dest):
 
     data = {
         "id": "ai-2027",
-        "title": "모두의 AI 예산",
+        "title": "모두의 AI 예산 심의",
         "unit": "백만원",
         "years": list(YEAR_COLUMNS.values()),
         "baseYear": "2027",

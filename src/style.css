@@ -7,6 +7,7 @@
   --accent: #2357d9;
   --up: #b3261e;
   --down: #1a7f4b;
+  --stamp: #c8312a;
 
   /* 대분류 색. 순서가 색약 구분을 보장하므로 바꾸지 않는다(validate_palette.js로 검증). */
   --series-1: #2a78d6;
@@ -28,6 +29,7 @@
     --accent: #7ea2ff;
     --up: #ff8a80;
     --down: #6fd39b;
+    --stamp: #ff7a6e;
 
     --series-1: #3987e5;
     --series-2: #d95926;
@@ -54,8 +56,10 @@ body {
 }
 
 h1 {
-  margin: 48px 0 8px;
-  font-size: 2rem;
+  margin: 0 0 8px;
+  font-size: 2.5rem;
+  line-height: 1.2;
+  word-break: keep-all;
 }
 
 h2 {
@@ -71,6 +75,105 @@ h3 {
 .status,
 .muted {
   color: var(--muted);
+}
+
+/* 히어로 */
+.eyebrow {
+  margin: 48px 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* 제목 옆 '심의' 도장. 처음 열 때 한 번 찍힌다. */
+.stamp {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 10px;
+  border: 3px solid var(--stamp);
+  border-radius: 8px;
+  color: var(--stamp);
+  transform: rotate(-8deg);
+  animation: stamp 0.45s 0.3s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: scale(2.2) rotate(-20deg);
+  }
+}
+
+.tagline {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+/* 칸 그림: 칸 하나가 100억 원 */
+.waffle-figure {
+  margin: 24px 0 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.waffle-figure figcaption {
+  margin-bottom: 12px;
+}
+
+.waffle-figure figcaption strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.waffle-figure figcaption span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.waffle {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--group-color);
+  animation: cell 0.3s calc(var(--i) * 1.2ms) ease-out backwards;
+}
+
+.cell.absent {
+  background: transparent;
+  outline: 2px dashed var(--group-color);
+  outline-offset: -2px;
+}
+
+@keyframes cell {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+.legend .count {
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+
+.start {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 /* 핵심 숫자 카드 */
@@ -220,6 +323,19 @@ h3 {
 
   .fact strong {
     font-size: 1.75rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+  }
+
+  .waffle {
+    grid-template-columns: repeat(auto-fill, minmax(7px, 1fr));
+    gap: 1px;
   }
 
   .summary {
@@ -444,5 +560,10 @@ footer {
   .fill,
   .seg {
     transition: none;
+  }
+
+  .stamp,
+  .cell {
+    animation: none;
   }
 }
