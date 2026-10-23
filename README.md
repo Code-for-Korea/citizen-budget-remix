@@ -1,6 +1,6 @@
 # citizen-budget-remix
 
-**사이트: <https://peace-code.github.io/citizen-budget-remix/>**
+**사이트: <https://budget.codefor.kr/>**
 
 **모두의 AI 예산 심의** — 국회가 심사하는 AI 예산, 시민도 직접 나눠 보고 따져 봅니다.
 
@@ -89,6 +89,14 @@ python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 ## 배포
 
 저장소 루트를 그대로 GitHub Pages 같은 정적 호스팅에 올리면 됩니다.
+
+사이트 주소는 `budget.codefor.kr`이며 루트의 `CNAME` 파일에 적혀 있습니다. 이 주소가 동작하려면 codefor.kr의 DNS에 다음 레코드가 있어야 합니다.
+
+| 이름 | 종류 | 값 |
+| --- | --- | --- |
+| `budget` | CNAME | `peace-code.github.io` |
+
+레코드가 퍼진 뒤 저장소 Settings → Pages에서 사용자 도메인이 `budget.codefor.kr`로 잡혔는지 확인하고 「Enforce HTTPS」를 켭니다.
 
 ## 라이선스
 
