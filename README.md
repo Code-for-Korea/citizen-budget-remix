@@ -1,5 +1,7 @@
 # citizen-budget-remix
 
+**사이트: <https://peace-code.github.io/citizen-budget-remix/>**
+
 시민이 공공 예산 항목의 설명을 읽고, 직접 금액을 조절해 보고, 자기가 짠 예산을 링크로 공유하는 정적 웹사이트입니다. 첫 캠페인은 과학기술정보통신부가 공개한 AI 예산을 다루는 「모두의 AI 예산」입니다.
 
 ## 특징
