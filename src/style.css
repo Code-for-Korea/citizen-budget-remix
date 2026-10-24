@@ -532,8 +532,8 @@ a {
 /* 핵심 숫자 */
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 20px 16px;
   margin: 32px 0 16px;
 }
 

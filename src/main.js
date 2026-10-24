@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240203';
-import { setupBoard } from './board.js?v=202610240203';
-import { setupShare } from './share.js?v=202610240203';
+import { el } from './dom.js?v=202610240313';
+import { setupBoard } from './board.js?v=202610240313';
+import { setupShare } from './share.js?v=202610240313';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240203';
+} from './budget.js?v=202610240313';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -249,20 +249,21 @@ function categoryCard(category) {
   );
 }
 
-// 맨 위 핵심 숫자: 가장 큰 사업 하나의 비중, 안전·신뢰 비중, 정부안에 없는 칸.
+// 맨 위 핵심 숫자: 대분류마다 정부안에서 차지하는 비중, 가장 큰 사업 하나의 비중, 정부안에 없는 칸.
 function renderFacts() {
   const gov = sum(data.categories, base);
   const items = data.categories.filter((c) => !isAmount(c)).flatMap((c) => c.items);
   const top = items.reduce((a, b) => (b.amounts[data.baseYear] > a.amounts[data.baseYear] ? b : a));
-  const safety = data.groups.find((g) => g.name === '안전·신뢰');
   const absent = data.categories.find(isAmount);
 
   const facts = [
+    ...data.groups.filter((g) => !isAbsentGroup(g)).map((group) => {
+      const amount = sum(members(group), base);
+      return [`${percentOf(amount, gov)}%`, `${group.name} · ${won(amount)}`, group];
+    }),
     [`${Math.round((top.amounts[data.baseYear] / gov) * 100)}%`,
       `「${top.detail || top.name}」 사업 하나가 ${data.baseLabel} 전체에서 차지하는 비중`,
       data.groups.find((g) => g.name === data.categories.find((c) => c.items.includes(top)).group)],
-    safety && [`${percentOf(sum(members(safety), base), gov)}%`,
-      `안전·신뢰 분야 전체(${won(sum(members(safety), base))})의 비중`, safety],
     absent && ['0원', `정부 분류에 '${absent.name}' 칸이 없습니다`,
       data.groups.find((g) => g.name === absent.group)],
   ].filter(Boolean);
