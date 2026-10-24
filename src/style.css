@@ -490,10 +490,12 @@ a {
   vertical-align: 1px;
 }
 
+/* 정부안에 없는 칸: 다른 네모와 같은 크기의 속이 빈 박스(테두리를 안쪽에 그린다) */
 .legend li.absent::before,
 .group.absent h2::before {
+  box-sizing: border-box;
   background: transparent;
-  border: 2px dashed var(--red);
+  border: 2px solid var(--red);
 }
 
 .hero-actions {
