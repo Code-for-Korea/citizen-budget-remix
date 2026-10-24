@@ -1,7 +1,7 @@
 // GNB의 '공유' 버튼: 사이트 주소를 나눈다. 휴대폰에서는 운영체제 공유 시트를 열고,
 // 공유 시트가 없으면 링크를 복사한 뒤 잠깐 알림을 띄운다. 모든 페이지(main.js, posts.js)가 부른다.
 
-import { el } from './dom.js?v=202610240357';
+import { el } from './dom.js?v=202610240359';
 
 const SITE = new URL('../', import.meta.url).href;
 const TITLE = '모두의 AI 예산 심의';

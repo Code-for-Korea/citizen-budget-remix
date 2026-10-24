@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240357';
-import { setupBoard } from './board.js?v=202610240357';
-import { setupShare } from './share.js?v=202610240357';
+import { el } from './dom.js?v=202610240359';
+import { setupBoard } from './board.js?v=202610240359';
+import { setupShare } from './share.js?v=202610240359';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240357';
+} from './budget.js?v=202610240359';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -42,18 +42,32 @@ function isAbsentGroup(group) {
   return members(group).every(isAmount);
 }
 
-function readHash() {
-  for (const [id, value] of parseBudget(location.hash)) values.set(id, value);
-}
-
-function writeHash() {
-  const text = budgetText();
-  history.replaceState(null, '', location.pathname + location.search + (text ? `#${text}` : ''));
+function saveBudget(text) {
   try {
     localStorage.setItem(SAVED_KEY, text);
   } catch {
     // 기억하지 못해도 화면은 동작한다.
   }
+}
+
+function savedBudget() {
+  try {
+    return localStorage.getItem(SAVED_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+// 주소의 예산을 읽고 기억한다. 시민 예산안을 불러와 주소가 바뀐 때도 여기로 온다.
+function readHash() {
+  for (const [id, value] of parseBudget(location.hash)) values.set(id, value);
+  saveBudget(budgetText());
+}
+
+function writeHash() {
+  const text = budgetText();
+  history.replaceState(null, '', location.pathname + location.search + (text ? `#${text}` : ''));
+  saveBudget(text);
 }
 
 // 증감을 색과 함께 쓴다. 정부안에서 바꾸지 않았으면(diff가 0) 아무것도 쓰지 않는다.
@@ -484,6 +498,9 @@ async function start() {
     document.querySelector('#groups .status').textContent = '예산 자료를 불러오지 못했습니다.';
     return;
   }
+  // 탭 바로 홈에 돌아오면 주소에 예산이 없다. 그때는 이 브라우저가 기억한 예산을 이어서 보여 준다('처음으로'로 비운다).
+  const saved = savedBudget();
+  if (!location.hash.includes('c=') && saved) history.replaceState(null, '', `${location.pathname}${location.search}#${saved}`);
   readHash();
   render();
   update();

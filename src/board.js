@@ -13,11 +13,11 @@
 // - [data-count="talk|budget"]: 글 수.
 // 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240357';
-import { el } from './dom.js?v=202610240357';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240359';
+import { el } from './dom.js?v=202610240359';
 import {
   data, levels, levelOf, isAmount, base, won, signed, sum, budgetPairs, parseBudget, proposalText, summarize,
-} from './budget.js?v=202610240357';
+} from './budget.js?v=202610240359';
 
 const SESSION_KEY = 'board-session';
 const NAME_KEY = 'board-name';
@@ -375,11 +375,19 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
     ].filter(Boolean));
   }
 
+  // 모달 내용을 통째로 바꾸면 누른 버튼이 사라져 키보드 초점이 페이지로 빠진다. 바뀐 화면의 제목으로 초점을 옮긴다.
+  function focusViewer() {
+    const heading = viewer.querySelector('h2');
+    heading.tabIndex = -1;
+    heading.focus();
+  }
+
   function openViewer(next) {
     viewing = next;
     renderViewer();
     if (!viewer.open) viewer.showModal();
     viewer.scrollTop = 0;
+    focusViewer();
   }
 
   function render() {
@@ -548,10 +556,13 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
   async function remove(post) {
     if (!confirm(`「${post.title}」을(를) 지울까요? 지운 글은 되살릴 수 없습니다.`)) return;
     try {
-      await rest(`posts?id=eq.${post.id}`, { method: 'DELETE', token: await token() });
+      // 권한이 없으면 PostgREST는 지운 것 없이 204를 돌려준다. 지운 행을 돌려받아 정말 지웠는지 확인한다.
+      const deleted = await rest(`posts?id=eq.${post.id}&select=id`, { method: 'DELETE', token: await token(), prefer: 'return=representation' });
+      if (!deleted?.length) throw new Error('이 브라우저에서 쓴 글이 아니라서 지울 수 없습니다.');
       posts = posts.filter((p) => p.id !== post.id);
       if (viewing?.post?.id === post.id) viewing = { target: viewing.target, kind: viewing.kind };
       render();
+      if (viewer.open) focusViewer();
     } catch (failure) {
       alert(`지우지 못했습니다. ${failure.message}`);
     }
