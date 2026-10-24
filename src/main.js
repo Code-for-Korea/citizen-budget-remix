@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240439';
-import { setupBoard } from './board.js?v=202610240439';
-import { setupShare } from './share.js?v=202610240439';
+import { el } from './dom.js?v=202610240442';
+import { setupBoard } from './board.js?v=202610240442';
+import { setupShare } from './share.js?v=202610240442';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240439';
+} from './budget.js?v=202610240442';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -15,14 +15,17 @@ const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 const SAVED_KEY = 'my-budget';
 
 const values = new Map();
+// 사용자가 단계를 직접 고른 분야. 처음에는 비어 있어 어느 버튼도 눌려 있지 않다.
+const chosen = new Set();
 
 // 지금 화면에서 고른 값(values)으로 계산한다.
 function mine(category) {
   return budgetMine(category, values);
 }
 
+// 주소와 기억에는 '유지'를 직접 고른 분야도 담아, 다시 열어도 고른 표시가 남게 한다.
 function budgetText() {
-  return budgetString(values);
+  return budgetString(values, chosen);
 }
 
 function highlights() {
@@ -61,6 +64,8 @@ function savedBudget() {
 // 주소의 예산을 읽고 기억한다. 시민 예산안을 불러와 주소가 바뀐 때도 여기로 온다.
 function readHash() {
   for (const [id, value] of parseBudget(location.hash)) values.set(id, value);
+  chosen.clear();
+  for (const id of budgetPairs(location.hash).keys()) chosen.add(id);
   saveBudget(budgetText());
 }
 
@@ -108,7 +113,10 @@ function update() {
 
   for (const category of data.categories) {
     const card = document.getElementById(`cat-${category.id}`);
-    card.querySelector(`input[value="${values.get(category.id)}"]`).checked = true;
+    // 아직 고르지 않은 분야는 어느 단계도 표시하지 않는다(계산은 정부안 그대로).
+    for (const input of card.querySelectorAll('.levels input')) {
+      input.checked = chosen.has(category.id) && Number(input.value) === values.get(category.id);
+    }
     setComparison(card.querySelector('.yoy'), mine(category));
   }
 
@@ -208,6 +216,7 @@ function levelPicker(category) {
       const input = el('input', { type: 'radio', name, value: level.value });
       input.addEventListener('change', () => {
         values.set(category.id, level.value);
+        chosen.add(category.id);
         update();
         writeHash();
       });
@@ -276,7 +285,10 @@ function renderTallies(posts) {
 // 제안의 값을 지금 예산에 덮어쓰고 그 분야를 보여 준다.
 function applyBudget(text) {
   const pairs = budgetPairs(text);
-  for (const [id, value] of pairs) values.set(id, value);
+  for (const [id, value] of pairs) {
+    values.set(id, value);
+    chosen.add(id);
+  }
   update();
   writeHash();
   const [first] = pairs.keys();
@@ -547,7 +559,7 @@ async function start() {
     document.querySelector('#groups .status').textContent = '예산 자료를 불러오지 못했습니다.';
     return;
   }
-  // 탭 바로 홈에 돌아오면 주소에 예산이 없다. 그때는 이 브라우저가 기억한 예산을 이어서 보여 준다('처음으로'로 비운다).
+  // 탭 바로 홈에 돌아오면 주소에 예산이 없다. 그때는 이 브라우저가 기억한 예산을 이어서 보여 준다('다시 시작'으로 비운다).
   const saved = savedBudget();
   if (!location.hash.includes('c=') && saved) history.replaceState(null, '', `${location.pathname}${location.search}#${saved}`);
   readHash();
@@ -559,7 +571,8 @@ async function start() {
     document.documentElement.style.setProperty('--summary-height', `${summary.offsetHeight}px`);
   }).observe(summary);
   setupBoard({
-    currentBudget: () => budgetText(),
+    // 게시판에는 정부안에서 바꾼 분야만 넘긴다(바꾼 게 없으면 시민 예산안을 낼 수 없다).
+    currentBudget: () => budgetString(values),
     loadBudget: (text) => {
       location.hash = text;
       document.getElementById('summary').scrollIntoView();
@@ -580,6 +593,7 @@ async function start() {
   }
   document.getElementById('reset').addEventListener('click', () => {
     for (const category of data.categories) values.set(category.id, initial(category));
+    chosen.clear();
     update();
     writeHash();
     document.getElementById('share-status').textContent = '';

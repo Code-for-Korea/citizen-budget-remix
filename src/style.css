@@ -800,6 +800,10 @@ a {
 }
 
 @media (max-width: 480px) {
+  .summary .actions {
+    gap: 6px;
+  }
+
   .summary .actions button {
     padding: 6px 10px;
     font-size: 0.9rem;
@@ -891,6 +895,28 @@ button.secondary:hover {
   border-color: var(--red);
   background: transparent;
   color: var(--red);
+}
+
+/* 아주 좁은 화면(360px 안팎)에서도 요약 영역 버튼 셋이 한 줄에 들어가게 */
+@media (max-width: 400px) {
+  .summary .actions button {
+    padding: 5px 7px;
+    font-size: 0.82rem;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* 글자 앞에 붙는 작은 줄 그림 아이콘 */
+.button-icon {
+  width: 1em;
+  height: 1em;
+  margin-right: 4px;
+  vertical-align: -0.12em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 button:disabled {

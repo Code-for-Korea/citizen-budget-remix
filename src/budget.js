@@ -2,7 +2,7 @@
 // 정부 분류의 칸은 정부안 대비 다섯 단계 중 하나를, 정부안에 없는 칸(input: 'amount')은 금액 다섯 단계 중 하나를 고른다.
 // 조절 값은 "c=id:값,..." 문자열로 주소의 해시와 시민 예산안에 담는다. 값은 퍼센트, 금액 칸은 억 원 단위다.
 
-const CAMPAIGN = new URL('../campaigns/ai-2027/budget.json?v=202610240439', import.meta.url);
+const CAMPAIGN = new URL('../campaigns/ai-2027/budget.json?v=202610240442', import.meta.url);
 
 // 국회 심의처럼 늘릴지 줄일지와 그 폭만 고른다. tone은 화면의 색(style.css의 .level.up/.down: 늘림은 빨강, 줄임은 파랑),
 // arrow는 색을 보지 않아도 방향을 알 수 있게 붙이는 표시다.
@@ -130,10 +130,10 @@ function encode(categories, budget) {
   return `c=${categories.map((c) => `${c.id}:${isAmount(c) ? budget.get(c.id) / 100 : budget.get(c.id)}`).join(',')}`;
 }
 
-// 정부안에서 바꾼 분야만 담는다. 바꾼 게 없으면 빈 문자열이다.
-export function budgetText(budget) {
-  const changed = data.categories.filter((c) => budget.get(c.id) !== initial(c));
-  return changed.length ? encode(changed, budget) : '';
+// 정부안에서 바꾼 분야만 담는다. chosen(분야 id 모음)을 주면 정부안 그대로 고른 분야도 담는다. 담을 게 없으면 빈 문자열이다.
+export function budgetText(budget, chosen = null) {
+  const kept = data.categories.filter((c) => budget.get(c.id) !== initial(c) || chosen?.has(c.id));
+  return kept.length ? encode(kept, budget) : '';
 }
 
 // 제안의 조절 값: 대상 분야(대분류면 그 아래 정부 분류 칸 모두)에 같은 단계를 적는다. '유지'도 적는다.
