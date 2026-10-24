@@ -1,56 +1,28 @@
-// 캠페인 데이터를 불러와 중분류별 조절 화면을 그린다.
-// 정부 분류의 칸은 정부안 대비 퍼센트로, 정부안에 없는 칸(input: 'amount')은 금액으로 조절한다.
-// 조절 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값은 퍼센트, 금액 칸은 억 원 단위다.
-// 같은 형식의 문자열을 시민 심의 게시판의 구성안에도 저장한다.
+// 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
+// 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
 import { el } from './dom.js';
 import { setupBoard } from './board.js';
+import {
+  data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
+  parseBudget, summarize, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
+} from './budget.js';
 
-const CAMPAIGN = 'campaigns/ai-2027/budget.json';
-const MAX_PERCENT = 500;
-const STEP = 5;
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
 const values = new Map();
-let data;
-let board;
 
-// 백만원 단위 금액을 "6조 1,490억"처럼 읽기 쉽게 바꾼다.
-function won(million) {
-  const eok = Math.round(million / 100);
-  if (eok === 0) return million > 0 ? '1억 미만' : '0원';
-  const jo = Math.floor(eok / 10000);
-  const rest = eok % 10000;
-  const parts = [];
-  if (jo) parts.push(`${jo.toLocaleString('ko-KR')}조`);
-  if (rest) parts.push(`${rest.toLocaleString('ko-KR')}억`);
-  return parts.join(' ');
+// 지금 화면에서 고른 값(values)으로 계산한다.
+function mine(category) {
+  return budgetMine(category, values);
 }
 
-function signed(million) {
-  if (Math.round(million / 100) === 0) return '변화 없음';
-  return `${million > 0 ? '+' : '−'}${won(Math.abs(million))}`;
+function budgetText() {
+  return budgetString(values);
 }
 
-function isAmount(category) {
-  return category.input === 'amount';
-}
-
-function initial(category) {
-  return isAmount(category) ? 0 : 100;
-}
-
-function base(category) {
-  return category.amounts[data.baseYear];
-}
-
-function mine(category, budget = values) {
-  const value = budget.get(category.id);
-  return isAmount(category) ? value : Math.round((base(category) * value) / 100);
-}
-
-function sum(categories, amount) {
-  return categories.reduce((s, c) => s + amount(c), 0);
+function highlights() {
+  return budgetHighlights(values);
 }
 
 function members(group) {
@@ -66,35 +38,6 @@ function isAbsentGroup(group) {
   return members(group).every(isAmount);
 }
 
-function clamp(category, raw) {
-  const [max, step] = isAmount(category) ? [category.max, category.step] : [MAX_PERCENT, STEP];
-  return Math.min(max, Math.max(0, Math.round(raw / step) * step));
-}
-
-// "c=id:값,..." 문자열(주소의 해시나 구성안)을 분야별 조절 값으로 읽는다.
-function parseBudget(text) {
-  const budget = new Map(data.categories.map((c) => [c.id, initial(c)]));
-  const match = text.match(/c=([^&]*)/);
-  if (!match) return budget;
-  for (const pair of decodeURIComponent(match[1]).split(',')) {
-    const [id, value] = pair.split(':');
-    const category = data.categories.find((c) => c.id === id);
-    const number = Number(value);
-    if (category && Number.isFinite(number)) {
-      budget.set(id, clamp(category, isAmount(category) ? number * 100 : number));
-    }
-  }
-  return budget;
-}
-
-// 정부안에서 바꾼 분야만 담는다. 바꾼 게 없으면 빈 문자열이다.
-function budgetText(budget = values) {
-  const changed = data.categories
-    .filter((c) => budget.get(c.id) !== initial(c))
-    .map((c) => `${c.id}:${isAmount(c) ? budget.get(c.id) / 100 : budget.get(c.id)}`);
-  return changed.length ? `c=${changed.join(',')}` : '';
-}
-
 function readHash() {
   for (const [id, value] of parseBudget(location.hash)) values.set(id, value);
 }
@@ -104,31 +47,16 @@ function writeHash() {
   history.replaceState(null, '', location.pathname + location.search + (text ? `#${text}` : ''));
 }
 
-function setChange(node, diff) {
-  node.textContent = signed(diff);
-  node.className = `change ${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}`;
+// 증감을 색과 함께 쓴다. 정부안에서 바꾸지 않았으면(diff가 0) 아무것도 쓰지 않는다.
+function setChange(node, diff, text = signed(diff)) {
+  const zero = Math.round(diff / 100) === 0;
+  node.textContent = zero && text === signed(diff) ? '' : text;
+  node.classList.toggle('up', !zero && diff > 0);
+  node.classList.toggle('down', !zero && diff < 0);
 }
 
 function percentOf(part, whole) {
   return whole ? ((part / whole) * 100).toFixed(1) : '0.0';
-}
-
-// 가장 많이 늘리고 줄인 분야를 알려 준다. 바꾼 분야가 없으면 빈 배열이다.
-function highlights(budget = values) {
-  const diffs = data.categories.map((c) => ({ c, diff: mine(c, budget) - base(c) }));
-  const up = diffs.reduce((a, b) => (b.diff > a.diff ? b : a), { diff: 0 });
-  const down = diffs.reduce((a, b) => (b.diff < a.diff ? b : a), { diff: 0 });
-  const parts = [];
-  if (Math.round(up.diff / 100)) parts.push(`가장 늘린 분야: ${up.c.name} ${signed(up.diff)}`);
-  if (Math.round(down.diff / 100)) parts.push(`가장 줄인 분야: ${down.c.name} ${signed(down.diff)}`);
-  return parts;
-}
-
-// 구성안 한 줄 요약: 합계가 얼마나 달라졌고 어느 분야를 가장 바꿨는지.
-function summarize(text) {
-  const budget = parseBudget(text);
-  const diff = sum(data.categories, (c) => mine(c, budget)) - sum(data.categories, base);
-  return [`합계 ${signed(diff)}`, ...highlights(budget)].join(' · ');
 }
 
 function updateBars(gov, total) {
@@ -149,32 +77,31 @@ function updateBars(gov, total) {
 function update() {
   const gov = sum(data.categories, base);
   const total = sum(data.categories, mine);
-  document.getElementById('total-gov').textContent = won(gov);
   document.getElementById('total-mine').textContent = won(total);
   setChange(document.getElementById('total-diff'), total - gov);
   document.getElementById('highlights').textContent =
-    highlights().join(' · ') || '아직 바꾼 분야가 없습니다. 아래 슬라이더를 움직여 보세요.';
+    highlights().join(' · ') || '아직 바꾼 분야가 없습니다. 아래에서 분야마다 증액·감액을 골라 보세요.';
   updateBars(gov, total);
 
   for (const category of data.categories) {
     const card = document.getElementById(`cat-${category.id}`);
-    card.querySelector('input').value = values.get(category.id);
-    card.querySelector('.mine').textContent = isAmount(category)
-      ? won(mine(category))
-      : `${won(mine(category))} (${values.get(category.id)}%)`;
+    card.querySelector(`input[value="${values.get(category.id)}"]`).checked = true;
+    card.querySelector('.mine').textContent = won(mine(category));
     card.querySelector('.share').textContent =
       `전체 중 비중 ${percentOf(base(category), gov)}% → ${percentOf(mine(category), total)}%`;
-    setChange(card.querySelector('.change'), mine(category) - base(category));
+    setChange(card.querySelector('.mine-diff'), mine(category) - base(category));
   }
 
   data.groups.forEach((group, index) => {
-    document.getElementById(`group-total-${index}`).textContent =
-      `정부안 ${won(sum(members(group), base))} → 내 예산 ${won(sum(members(group), mine))}`;
+    const [before, after, my] = [prev, base, mine].map((amount) => sum(members(group), amount));
+    document.getElementById(`group-total-${index}`).textContent = isAbsentGroup(group)
+      ? `내 예산 ${won(my)}`
+      : `${prevYear()}년 ${won(before)} → ${data.baseLabel} ${won(after)} · ${growth(before, after)}`
+        + (my === after ? '' : ` · 내 예산 ${won(my)}`);
   });
 }
 
 function itemTable(category) {
-  const [prevYear] = data.years.slice(-2);
   const rows = category.items.map((item) =>
     el('tr', {},
       el('td', {},
@@ -182,14 +109,14 @@ function itemTable(category) {
         item.detail ? el('span', { className: 'detail', textContent: item.detail }) : null,
         item.category ? el('span', { className: 'detail', textContent: `정부 분류: ${item.category}` }) : null,
       ),
-      el('td', { className: 'num', textContent: won(item.amounts[prevYear]) }),
+      el('td', { className: 'num', textContent: won(item.amounts[prevYear()]) }),
       el('td', { className: 'num', textContent: won(item.amounts[data.baseYear]) }),
     ));
   return el('div', { className: 'table-wrap' },
     el('table', {},
       el('thead', {}, el('tr', {},
         el('th', { textContent: '사업' }),
-        el('th', { className: 'num', textContent: `${prevYear}년 예산` }),
+        el('th', { className: 'num', textContent: `${prevYear()}년 예산` }),
         el('th', { className: 'num', textContent: data.baseLabel }),
       )),
       el('tbody', {}, ...rows),
@@ -205,54 +132,65 @@ function relatedNote(category) {
     el('strong', { textContent: `관련 사업 ${category.items.length}개를 모두 더해도 ${won(related)}, ${data.baseLabel} 전체의 ${percentOf(related, gov)}%입니다.` }));
 }
 
+// 전년 예산 → 정부안과 그 증감. 정부안에 없는 칸은 두 해 모두 0원이라 쓰지 않는다.
+function yearOverYear(category) {
+  const change = el('span', { className: 'change' });
+  setChange(change, base(category) - prev(category), growth(prev(category), base(category)));
+  return el('p', { className: 'yoy' },
+    `${prevYear()}년 ${won(prev(category))} → ${data.baseLabel} ${won(base(category))} `, change);
+}
+
+// 분야마다 다섯 단계 가운데 하나를 고른다. 라디오 버튼이라 키보드 화살표로도 고를 수 있다.
+function levelPicker(category) {
+  const name = `level-${category.id}`;
+  return el('fieldset', { className: 'levels' },
+    el('legend', { className: 'visually-hidden', textContent: `${category.name} 예산` }),
+    ...levels(category).map((level) => {
+      const input = el('input', { type: 'radio', name, value: level.value });
+      input.addEventListener('change', () => {
+        values.set(category.id, level.value);
+        update();
+        writeHash();
+      });
+      return el('label', { className: `level ${level.tone}` },
+        input,
+        el('span', { className: 'level-label', textContent: level.label }),
+        level.note ? el('span', { className: 'level-note', textContent: level.note }) : null,
+      );
+    }),
+  );
+}
+
+// 의견 수를 보여 주고 누르면 그 대상의 의견 목록을 연다. 글자와 동작은 board.js가 채운다.
+function opinionButton(target) {
+  const button = el('button', { type: 'button', className: 'opinions link', textContent: '의견' });
+  button.dataset.opinions = target;
+  return button;
+}
+
 function categoryCard(category) {
   const amount = isAmount(category);
-  const slider = el('input', {
-    type: 'range',
-    min: 0,
-    max: amount ? category.max : MAX_PERCENT,
-    step: amount ? category.step : STEP,
-    value: initial(category),
-  });
-  slider.setAttribute('aria-label', amount
-    ? `${category.name} 예산 (금액)`
-    : `${category.name} 예산 (정부안 대비 퍼센트)`);
-  slider.addEventListener('input', () => {
-    values.set(category.id, Number(slider.value));
-    update();
-    writeHash();
-  });
-
-  const mark = amount ? null : el('span', { className: 'gov-mark', textContent: '정부안' });
-  mark?.style.setProperty('--at', 100 / MAX_PERCENT);
-
   return el('article', { className: `category${amount ? ' absent' : ''}`, id: `cat-${category.id}` },
     el('div', { className: 'category-head' },
       el('h3', { textContent: category.name }),
       el('span', { className: 'amounts' },
-        `정부안 ${won(base(category))} → `,
+        '내 예산 ',
         el('strong', { className: 'mine' }),
         ' ',
-        el('span', { className: 'change' }),
+        el('span', { className: 'change mine-diff' }),
       ),
     ),
-    el('div', { className: 'slider' }, mark, slider),
+    amount ? null : yearOverYear(category),
+    levelPicker(category),
     el('div', { className: 'scale' },
-      el('span', { textContent: amount ? '0원' : '0%' }),
       el('span', { className: 'share' }),
-      el('span', { textContent: amount ? won(category.max) : `${MAX_PERCENT}%` }),
+      opinionButton(category.id),
     ),
     el('details', {},
       el('summary', { textContent: `설명과 ${amount ? '관련 사업' : '세부사업'} ${category.items.length}개` }),
       el('p', { textContent: category.description }),
       relatedNote(category),
       itemTable(category),
-      el('button', {
-        type: 'button',
-        className: 'link',
-        textContent: '이 분야에 의문 남기기',
-        onclick: () => board.ask(category.id),
-      }),
     ),
   );
 }
@@ -371,7 +309,18 @@ function setupTooltip() {
   }
 }
 
+function renderTotals() {
+  const before = sum(data.categories, prev);
+  const gov = sum(data.categories, base);
+  document.getElementById('total-prev-label').textContent = `${prevYear()}년 예산`;
+  document.getElementById('total-prev').textContent = won(before);
+  document.getElementById('total-gov-label').textContent = data.baseLabel;
+  document.getElementById('total-gov').textContent = won(gov);
+  setChange(document.getElementById('total-growth'), gov - before, growth(before, gov));
+}
+
 function render() {
+  renderTotals();
   renderWaffle();
   renderFacts();
   renderLegend();
@@ -380,7 +329,10 @@ function render() {
   const main = document.getElementById('groups');
   main.replaceChildren(...data.groups.map((group, index) => {
     const section = el('section', { className: `group${isAbsentGroup(group) ? ' absent' : ''}` },
-      el('h2', { textContent: group.name }),
+      el('div', { className: 'group-head' },
+        el('h2', { textContent: group.name }),
+        isAbsentGroup(group) ? null : opinionButton(`group:${group.name}`),
+      ),
       el('p', {},
         group.description,
         el('br'),
@@ -414,7 +366,7 @@ async function share() {
 
 async function start() {
   try {
-    data = await (await fetch(CAMPAIGN)).json();
+    await loadCampaign();
   } catch {
     document.querySelector('#groups .status').textContent = '예산 자료를 불러오지 못했습니다.';
     return;
@@ -427,8 +379,9 @@ async function start() {
   new ResizeObserver(() => {
     document.documentElement.style.setProperty('--summary-height', `${summary.offsetHeight}px`);
   }).observe(summary);
-  board = setupBoard({
+  setupBoard({
     campaign: data.id,
+    groups: data.groups,
     categories: data.categories,
     currentBudget: () => budgetText(),
     summarize,
@@ -439,7 +392,6 @@ async function start() {
   });
 
   document.getElementById('share').addEventListener('click', share);
-  document.getElementById('propose').addEventListener('click', () => board.propose());
   // 주소의 해시에 조절 값이 담기므로, 앵커 이동 대신 스크롤만 한다.
   for (const link of document.querySelectorAll('.start')) {
     link.addEventListener('click', (event) => {

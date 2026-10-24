@@ -8,11 +8,17 @@
   <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
+  <nav class="site-nav" aria-label="사이트 메뉴">
+    <a href="./" aria-current="page">홈</a>
+    <a href="opinions/">의견</a>
+    <a href="proposals/">시민 예산안</a>
+  </nav>
+
   <header class="intro">
     <p class="eyebrow">2027년 정부안 · 국회 심사 중</p>
     <h1>모두의 AI 예산 <span class="stamp">심의</span></h1>
     <p class="tagline">국회가 심사하는 AI 예산, 시민도 직접 나눠 보고 따져 봅니다.</p>
-    <p>과학기술정보통신부의 2027년 AI 예산 정부안을 15개 분야로 나눴습니다. 금액을 내 생각대로 조절해 보고, 정부안에 없는 '민주적 AI 거버넌스' 칸도 채워 보세요. 내가 짠 예산은 링크로 나눌 수 있습니다.</p>
+    <p>과학기술정보통신부의 2027년 AI 예산 정부안을 15개 분야로 나눴습니다. 금액을 내 생각대로 조절해 보고, 정부안에 없는 '민주주의·공공재 AI' 칸도 채워 보세요. 내가 짠 예산은 링크로 나눌 수 있습니다.</p>
 
     <figure class="waffle-figure">
       <figcaption id="waffle-caption"></figcaption>
@@ -22,16 +28,16 @@
 
     <div class="hero-actions">
       <a class="start" href="#summary">내 예산 짜러 가기 ↓</a>
-      <a class="start secondary" href="#board">의문·구성안 보기</a>
+      <a class="start secondary" href="#board">의견·시민 예산안 보기</a>
     </div>
     <div class="facts" id="facts"></div>
   </header>
 
   <section class="summary" id="summary" aria-label="합계">
     <dl>
-      <div><dt>정부안</dt><dd id="total-gov">-</dd></div>
-      <div><dt>내 예산</dt><dd id="total-mine">-</dd></div>
-      <div><dt>차이</dt><dd id="total-diff">-</dd></div>
+      <div><dt id="total-prev-label">전년 예산</dt><dd id="total-prev">-</dd></div>
+      <div><dt id="total-gov-label">정부안</dt><dd><span id="total-gov">-</span> <small class="change" id="total-growth"></small></dd></div>
+      <div><dt>내 예산</dt><dd><span id="total-mine">-</span> <small class="change" id="total-diff"></small></dd></div>
     </dl>
     <div class="bars" aria-hidden="true">
       <div class="bar-row"><span class="bar-label">정부안</span><div class="track"><div class="fill" id="bar-gov"></div></div></div>
@@ -40,7 +46,7 @@
     <p class="highlights" id="highlights"></p>
     <div class="actions">
       <button type="button" id="share">링크 복사</button>
-      <button type="button" id="propose" class="secondary">구성안 내기</button>
+      <button type="button" class="secondary" data-write="proposal">시민 예산안 내기</button>
       <button type="button" id="reset" class="secondary">처음으로</button>
     </div>
     <p class="share-status" id="share-status" role="status"></p>
@@ -52,34 +58,32 @@
 
   <section class="board" id="board" aria-labelledby="board-title">
     <h2 id="board-title">시민 심의 게시판</h2>
-    <p class="board-intro">예산을 보다 생긴 의문을 남기거나, 내가 짠 예산을 구성안으로 내 보세요. 남긴 글은 목록에 쌓여 누구나 읽을 수 있습니다. 다른 사람의 구성안을 불러와 고친 뒤 새 구성안으로 낼 수도 있습니다.</p>
-    <div class="board-bar">
-      <div class="tabs" role="tablist" aria-label="글 종류">
-        <button type="button" role="tab" data-kind="question" aria-selected="true">의문 <span class="count"></span></button>
-        <button type="button" role="tab" data-kind="proposal" aria-selected="false">구성안 <span class="count"></span></button>
-      </div>
-      <button type="button" id="new-post">의문 남기기</button>
-    </div>
-    <p class="status board-status" id="board-status" role="status"></p>
-    <ol class="posts" id="posts"></ol>
-  </section>
+    <p class="board-intro">예산안 전체나 대분류·분야마다 의견을 남기고, 내가 짠 예산을 시민 예산안으로 내 보세요. 남긴 글은 누구나 읽을 수 있습니다. 다른 사람의 시민 예산안을 불러와 고친 뒤 새 시민 예산안으로 낼 수도 있습니다.</p>
 
-  <dialog id="post-dialog" aria-labelledby="post-dialog-title">
-    <form id="post-form" novalidate>
-      <h2 id="post-dialog-title"></h2>
-      <p class="hint" id="post-hint"></p>
-      <label>제목 <input name="title" maxlength="100" required></label>
-      <label class="category-field">분야 <select name="category_id"><option value="">예산 전체</option></select></label>
-      <label>내용 <textarea name="body" rows="6" maxlength="4000"></textarea></label>
-      <label>이름(별명) <input name="author_name" maxlength="30" autocomplete="nickname" required></label>
-      <p class="note">로그인 없이 씁니다. 내 글은 이 브라우저에서만 고치거나 지울 수 있습니다. 연락처 같은 개인정보는 적지 마세요.</p>
-      <p class="status" id="post-status" role="status"></p>
-      <div class="actions">
-        <button type="submit">올리기</button>
-        <button type="button" class="secondary" id="post-cancel">취소</button>
+    <section class="board-list" data-board-list data-kind="question" data-limit="5" aria-labelledby="recent-opinions">
+      <div class="board-bar">
+        <h3 id="recent-opinions">최근 의견 <span class="count" data-count="question"></span></h3>
+        <div class="board-actions">
+          <a href="opinions/">전체 보기</a>
+          <button type="button" data-write="question" data-target="">예산안 전체에 의견 남기기</button>
+        </div>
       </div>
-    </form>
-  </dialog>
+      <p class="status board-status" role="status"></p>
+      <ol class="posts"></ol>
+    </section>
+
+    <section class="board-list" data-board-list data-kind="proposal" data-limit="5" aria-labelledby="recent-proposals">
+      <div class="board-bar">
+        <h3 id="recent-proposals">최근 시민 예산안 <span class="count" data-count="proposal"></span></h3>
+        <div class="board-actions">
+          <a href="proposals/">전체 보기</a>
+          <button type="button" data-write="proposal">시민 예산안 내기</button>
+        </div>
+      </div>
+      <p class="status board-status" role="status"></p>
+      <ol class="posts"></ol>
+    </section>
+  </section>
 
   <footer id="source"></footer>
 

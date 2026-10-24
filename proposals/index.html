@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>시민 예산안 · 모두의 AI 예산 심의</title>
+  <meta name="description" content="시민이 직접 짠 2027년 AI 예산입니다. 「이 시민 예산안 불러오기」를 누르면 홈에서 그 예산을 보고 고쳐서 새 시민 예산안으로 낼 수 있습니다.">
+  <link rel="stylesheet" href="../src/style.css">
+</head>
+<body>
+  <nav class="site-nav" aria-label="사이트 메뉴">
+    <a href="../">홈</a>
+    <a href="../opinions/">의견</a>
+    <a href="../proposals/" aria-current="page">시민 예산안</a>
+  </nav>
+
+  <main class="board page">
+    <h1>시민 예산안 <span class="count" data-count="proposal"></span></h1>
+    <p class="board-intro">시민이 직접 짠 2027년 AI 예산입니다. 「이 시민 예산안 불러오기」를 누르면 홈에서 그 예산을 보고 고쳐서 새 시민 예산안으로 낼 수 있습니다.</p>
+
+    <section class="board-list" data-board-list data-kind="proposal" aria-label="시민 예산안 목록">
+      <div class="board-bar">
+        <span></span>
+        <a class="start" href="../#summary">내 예산 짜러 가기</a>
+      </div>
+      <p class="status board-status" role="status"></p>
+      <ol class="posts"></ol>
+    </section>
+  </main>
+
+  <script type="module" src="../src/posts.js"></script>
+</body>
+</html>
