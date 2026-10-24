@@ -616,6 +616,54 @@ a {
   font-size: 0.95rem;
 }
 
+/* 늘어난 돈 따라가기: 증가액이 큰 세부사업 */
+.growth-list {
+  grid-column: 2;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.growth-list li {
+  display: grid;
+  grid-template-columns: 1fr 7em; /* 막대 바탕 길이가 줄마다 같도록 증가액 칸 폭을 고정한다 */
+  column-gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.growth-name {
+  grid-column: 1 / -1;
+  font-weight: 700;
+}
+
+.growth-amounts {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.growth-bar {
+  align-self: center;
+  height: 6px;
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.growth-bar i {
+  display: block;
+  height: 100%;
+  background: var(--up);
+}
+
+.growth-diff {
+  color: var(--up);
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
+
 /* 이 사이트가 다루지 않는 예산: 범위를 밝히는 상자 */
 .scope {
   margin: 16px 0;

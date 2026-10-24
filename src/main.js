@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240432';
-import { setupBoard } from './board.js?v=202610240432';
-import { setupShare } from './share.js?v=202610240432';
+import { el } from './dom.js?v=202610240435';
+import { setupBoard } from './board.js?v=202610240435';
+import { setupShare } from './share.js?v=202610240435';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240432';
+} from './budget.js?v=202610240435';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -331,6 +331,10 @@ function renderPoints() {
   const grown = data.groups.filter((g) => !isAbsentGroup(g))
     .reduce((a, b) => (groupAmount(b.name) - prevGroup(b.name) > groupAmount(a.name) - prevGroup(a.name) ? b : a));
   const grownBy = groupAmount(grown.name) - prevGroup(grown.name);
+  // 늘어난 돈 따라가기: 증가액이 가장 큰 세부사업 셋.
+  const growthOf = (item) => item.amounts[data.baseYear] - item.amounts[prevYear()];
+  const risers = [...items].sort((a, b) => growthOf(b) - growthOf(a)).slice(0, 3);
+  const topGrowth = risers.reduce((s, item) => s + growthOf(item), 0);
   const absent = data.categories.find(isAmount);
   const related = absent ? absent.items.reduce((s, i) => s + i.amounts[data.baseYear], 0) : 0;
 
@@ -340,15 +344,33 @@ function renderPoints() {
     safety && [`1 : ${Math.round(groupAmount(biggest.name) / safety)}`,
       `안전·신뢰에 1원을 쓸 때 ${biggest.name}에는 약 ${Math.round(groupAmount(biggest.name) / safety)}원을 씁니다. 안전·신뢰는 ${won(safety)}, 전체의 ${percentOf(safety, gov)}%입니다.`],
     gov > before && [`${Math.round((grownBy / (gov - before)) * 100)}%`,
-      `${prevYear()}년보다 늘어난 ${won(gov - before)} 가운데 ${Math.round((grownBy / (gov - before)) * 100)}%인 ${won(grownBy)}이 ${grown.name}에 들어갔습니다.`],
+      `${prevYear()}년보다 늘어난 ${won(gov - before)} 가운데 ${Math.round((grownBy / (gov - before)) * 100)}%인 ${won(grownBy)}이 ${grown.name}에 들어갔습니다. `
+      + `특히 아래 세 사업에만 ${won(topGrowth)}, 전체 증가분의 ${Math.round((topGrowth / (gov - before)) * 100)}%가 늘었습니다.`,
+      growthList(risers, gov - before)],
     absent && ['0원',
       `과기정통부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
   ].filter(Boolean);
 
-  document.getElementById('points').replaceChildren(...points.map(([value, text]) =>
+  document.getElementById('points').replaceChildren(...points.map(([value, text, extra]) =>
     el('li', { className: 'point' },
       el('strong', { className: 'point-value', textContent: value }),
-      el('p', { textContent: text }))));
+      el('p', { textContent: text }),
+      extra ?? null)));
+}
+
+// 세부사업마다 전년 → 정부안 금액과 증가액을 쓰고, 증가액이 전체 증가분에서 차지하는 만큼 빨간 막대로 그린다.
+function growthList(rows, totalGrowth) {
+  return el('ol', { className: 'growth-list' }, ...rows.map((item) => {
+    const before = item.amounts[prevYear()];
+    const after = item.amounts[data.baseYear];
+    const fill = el('i');
+    fill.style.width = `${((after - before) / totalGrowth) * 100}%`;
+    return el('li', {},
+      el('span', { className: 'growth-name', textContent: item.detail || item.name }),
+      el('span', { className: 'growth-amounts', textContent: `${won(before)} → ${won(after)}` }),
+      el('span', { className: 'growth-bar' }, fill),
+      el('strong', { className: 'growth-diff', textContent: signed(after - before) }));
+  }));
 }
 
 // 분야별 칸 수. 칸 수 합계가 정부안 합계의 칸 수와 맞도록 나머지가 큰 분야부터 한 칸씩 더 준다.
