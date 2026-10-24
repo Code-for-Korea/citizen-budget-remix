@@ -204,10 +204,25 @@ a {
     padding-bottom: calc(64px + 56px + env(safe-area-inset-bottom));
   }
 
-  /* 좁은 화면에서는 띠가 원래 화면 폭이다. clip-path가 아래에 고정한 탭 바까지 잘라 내지 않게 끈다. */
+  /* 좁은 화면에서는 위쪽 띠를 없애고 아래 탭 바만 남긴다. clip-path가 탭 바까지 잘라 내지 않게 끈다. */
   .gnb {
+    margin: 0;
+    padding: 0;
+    background: none;
     box-shadow: none;
     clip-path: none;
+  }
+
+  .gnb-brand {
+    display: none;
+  }
+
+  .eyebrow {
+    margin-top: calc(24px + env(safe-area-inset-top));
+  }
+
+  .board.page {
+    margin-top: calc(24px + env(safe-area-inset-top));
   }
 
   .gnb-menu {
@@ -689,6 +704,42 @@ button:disabled {
   color: var(--fg);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* 좁은 화면: 대분류마다 화면 폭 전체에 그 색을 옅게 깐 판과 위쪽 굵은 색 띠를 둬서, 스크롤하다 대분류가 바뀌면 바로 보이게 한다 */
+@media (max-width: 640px) {
+  .group {
+    margin: 0 -16px;
+    padding: 24px 16px 8px;
+    border-top: 10px solid var(--group-color);
+    background: color-mix(in srgb, var(--group-color) 8%, var(--bg));
+  }
+
+  .group + .group {
+    margin-top: 0;
+  }
+
+  .group h2 {
+    font-size: 1.75rem;
+    font-weight: 900;
+  }
+
+  .group h2::before {
+    display: none;
+  }
+
+  .group .category:last-child {
+    border-bottom: 0;
+  }
+
+  .group .level {
+    background: var(--bg);
+  }
+
+  .group .category.absent {
+    margin-bottom: 16px;
+    background: var(--bg);
+  }
 }
 
 /* 분야 카드 */
