@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240359';
-import { setupBoard } from './board.js?v=202610240359';
-import { setupShare } from './share.js?v=202610240359';
+import { el } from './dom.js?v=202610240402';
+import { setupBoard } from './board.js?v=202610240402';
+import { setupShare } from './share.js?v=202610240402';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240359';
+} from './budget.js?v=202610240402';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -33,7 +33,7 @@ function members(group) {
   return data.categories.filter((c) => c.group === group.name);
 }
 
-// 대분류 순서대로 고정된 색을 쓴다(style.css의 --series-N).
+// 대분류 순서(금액이 큰 것부터)대로 색을 쓴다(style.css의 --series-N). 팔레트는 이웃한 색끼리 구분되도록 이 순서로 검증했다.
 function groupColor(group) {
   return `var(--series-${data.groups.indexOf(group) + 1})`;
 }
@@ -281,10 +281,10 @@ function categoryCard(category) {
 // 맨 위 핵심 숫자: 대분류마다 정부안에서 차지하는 비중. 금액이 큰 대분류부터 놓는다.
 function renderFacts() {
   const gov = sum(data.categories, base);
-  const facts = data.groups.filter((g) => !isAbsentGroup(g))
-    .map((group) => ({ group, amount: sum(members(group), base) }))
-    .sort((a, b) => b.amount - a.amount)
-    .map(({ group, amount }) => [`${percentOf(amount, gov)}%`, `${group.name} · ${won(amount)}`, group]);
+  const facts = data.groups.filter((g) => !isAbsentGroup(g)).map((group) => {
+    const amount = sum(members(group), base);
+    return [`${percentOf(amount, gov)}%`, `${group.name} · ${won(amount)}`, group];
+  });
 
   document.getElementById('facts').replaceChildren(...facts.map(([value, label, group]) => {
     const card = el('div', { className: 'fact' }, el('strong', { textContent: value }), el('span', { textContent: label }));
