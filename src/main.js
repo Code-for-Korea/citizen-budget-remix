@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240422';
-import { setupBoard } from './board.js?v=202610240422';
-import { setupShare } from './share.js?v=202610240422';
+import { el } from './dom.js?v=202610240429';
+import { setupBoard } from './board.js?v=202610240429';
+import { setupShare } from './share.js?v=202610240429';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240422';
+} from './budget.js?v=202610240429';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -339,7 +339,7 @@ function renderPoints() {
     base(shrunk) < prev(shrunk) && [`${Math.round(((base(shrunk) - prev(shrunk)) / prev(shrunk)) * 100)}%`.replace('-', '−'),
       `전체 AI 예산이 ${prevYear()}년보다 ${Math.round(((gov - before) / before) * 100)}% 늘어나는 동안 「${shrunk.name}」 분야는 ${won(prev(shrunk))}에서 ${won(base(shrunk))}으로 가장 많이 줄었습니다.`],
     absent && ['0원',
-      `정부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
+      `과기정통부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
   ].filter(Boolean);
 
   document.getElementById('points').replaceChildren(...points.map(([value, text]) =>
@@ -391,7 +391,7 @@ function renderWaffle() {
   const absent = data.categories.find(isAmount);
   document.getElementById('waffle-caption').replaceChildren(
     el('strong', { textContent: `정부안 ${won(gov)} 원을 100억 원짜리 칸 ${total.toLocaleString('ko-KR')}개로 나눠 보면` }),
-    absent ? el('span', { textContent: `맨 끝 점선 칸이 정부안에 없는 '${absent.name}'입니다. 칸에 손가락이나 마우스를 올려 보세요.` }) : null,
+    absent ? el('span', { textContent: `맨 끝 점선 칸이 과기정통부 분류에 없는 '${absent.name}'입니다. 칸에 손가락이나 마우스를 올려 보세요.` }) : null,
   );
 }
 

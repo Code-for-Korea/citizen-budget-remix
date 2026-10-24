@@ -616,6 +616,24 @@ a {
   font-size: 0.95rem;
 }
 
+/* 이 사이트가 다루지 않는 예산: 범위를 밝히는 상자 */
+.scope {
+  margin: 16px 0;
+  padding: 12px 14px;
+  border: 2px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.scope h2 {
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.scope p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
 /* 합계: 스크롤해도 위에 붙어 있는 검은 점수판 */
 .summary {
   position: sticky;
