@@ -13,11 +13,11 @@
 // - [data-count="talk|budget"]: 글 수.
 // 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240415';
-import { el } from './dom.js?v=202610240415';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240416';
+import { el } from './dom.js?v=202610240416';
 import {
   data, levels, levelOf, isAmount, base, won, signed, sum, budgetPairs, parseBudget, proposalText, summarize,
-} from './budget.js?v=202610240415';
+} from './budget.js?v=202610240416';
 
 const SESSION_KEY = 'board-session';
 const NAME_KEY = 'board-name';
@@ -448,7 +448,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
     levelBox.replaceChildren(...levels(covered[0]).map((level) => el('label', { className: `level ${level.tone}` },
       el('input', { type: 'radio', name: 'level', value: level.value, checked: level.value === value }),
       el('span', { className: 'level-label', textContent: level.label }),
-      level.note ? el('span', { className: 'level-note', textContent: level.note }) : null)));
+      level.note ? el('span', { className: 'level-note', textContent: [level.arrow, level.note].filter(Boolean).join(' ') }) : null)));
   }
 
   // 종류에 맞게 창을 바꾼다. 제안은 예산안 전체를 대상으로 할 수 없다.

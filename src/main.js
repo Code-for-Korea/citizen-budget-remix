@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240415';
-import { setupBoard } from './board.js?v=202610240415';
-import { setupShare } from './share.js?v=202610240415';
+import { el } from './dom.js?v=202610240416';
+import { setupBoard } from './board.js?v=202610240416';
+import { setupShare } from './share.js?v=202610240416';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240415';
+} from './budget.js?v=202610240416';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -192,6 +192,11 @@ function setComparison(node, my, floor = 0) {
     row.querySelector('.yoy-amount').textContent = won(amount);
   }
   const diff = my - after;
+  // 내 예산 막대는 늘리면 빨강, 줄이면 파랑, 그대로면 검정이다(증감 색의 뜻과 같게).
+  const mineRow = node.querySelector('.yoy-row.mine');
+  const changed = Math.round(diff / 100) !== 0;
+  mineRow.classList.toggle('up', changed && diff > 0);
+  mineRow.classList.toggle('down', changed && diff < 0);
   const rate = after ? ` (${diff > 0 ? '+' : '−'}${Math.round((Math.abs(diff) / after) * 100)}%)` : '';
   setChange(node.querySelector('.yoy-diff'), diff, Math.round(diff / 100) ? `정부안보다 ${signed(diff)}${rate}` : '');
 }
@@ -211,7 +216,7 @@ function levelPicker(category) {
       return el('label', { className: `level ${level.tone}` },
         input,
         el('span', { className: 'level-label', textContent: level.label }),
-        level.note ? el('span', { className: 'level-note', textContent: level.note }) : null,
+        level.note ? el('span', { className: 'level-note', textContent: [level.arrow, level.note].filter(Boolean).join(' ') }) : null,
         el('span', { className: 'level-count' }),
       );
     }),
@@ -459,7 +464,11 @@ function render() {
   renderBars();
 
   const main = document.getElementById('groups');
-  main.replaceChildren(...data.groups.map((group, index) => {
+  // 증감 색의 뜻을 한 번 밝힌다. 대분류 색(칸 그림·막대)과 헷갈리지 않게 함께 적는다.
+  const key = el('p', { className: 'color-key' },
+    el('span', { className: 'change up', textContent: '▲ 빨강' }), '은 늘리는 쪽(증액), ',
+    el('span', { className: 'change down', textContent: '▼ 파랑' }), '은 줄이는 쪽(감액)입니다. 칸 그림과 맨 위 합계 막대의 여러 색은 대분류를 나타냅니다.');
+  main.replaceChildren(key, ...data.groups.map((group, index) => {
     const section = el('section', { className: `group${isAbsentGroup(group) ? ' absent' : ''}` },
       el('div', { className: 'group-head' },
         el('h2', { textContent: group.name }),

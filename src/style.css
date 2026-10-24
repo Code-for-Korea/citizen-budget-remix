@@ -838,6 +838,14 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* 증감 색의 뜻 */
+.color-key {
+  margin: 24px 0 0;
+  padding: 8px 12px;
+  border: 2px solid var(--rule);
+  font-size: 0.85rem;
+}
+
 /* 대분류 */
 .group {
   margin: 56px 0;
@@ -1009,7 +1017,7 @@ button:disabled {
 }
 
 .yoy-row.after .yoy-bar i {
-  background: var(--group-color);
+  background: var(--fg);
 }
 
 .yoy-label,
@@ -1021,13 +1029,13 @@ button:disabled {
   text-align: right;
 }
 
-/* 내 예산: 빨간 펜으로 강조한다 */
+/* 내 예산: 굵게 강조하고, 막대와 이름은 늘리면 빨강·줄이면 파랑 */
 .yoy-row.mine {
   margin-top: 2px;
 }
 
 .yoy-row.mine .yoy-label {
-  color: var(--red);
+  color: var(--fg);
   font-weight: 900;
 }
 
@@ -1036,7 +1044,23 @@ button:disabled {
 }
 
 .yoy-row.mine .yoy-bar i {
-  background: var(--red);
+  background: var(--fg);
+}
+
+.yoy-row.mine.up .yoy-bar i {
+  background: var(--up);
+}
+
+.yoy-row.mine.down .yoy-bar i {
+  background: var(--down);
+}
+
+.yoy-row.mine.up .yoy-label {
+  color: var(--up);
+}
+
+.yoy-row.mine.down .yoy-label {
+  color: var(--down);
 }
 
 .yoy-row.mine .yoy-amount {
