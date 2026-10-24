@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240430';
-import { setupBoard } from './board.js?v=202610240430';
-import { setupShare } from './share.js?v=202610240430';
+import { el } from './dom.js?v=202610240432';
+import { setupBoard } from './board.js?v=202610240432';
+import { setupShare } from './share.js?v=202610240432';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240430';
+} from './budget.js?v=202610240432';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -326,8 +326,11 @@ function renderPoints() {
   const groupAmount = (name) => sum(data.categories.filter((c) => c.group === name), base);
   const biggest = data.groups.filter((g) => !isAbsentGroup(g)).reduce((a, b) => (groupAmount(b.name) > groupAmount(a.name) ? b : a));
   const safety = groupAmount('안전·신뢰');
-  const shrunk = data.categories.filter((c) => !isAmount(c) && prev(c) > 0)
-    .reduce((a, b) => (base(b) / prev(b) < base(a) / prev(a) ? b : a));
+  // 늘어난 돈이 가장 많이 들어간 대분류.
+  const prevGroup = (name) => sum(data.categories.filter((c) => c.group === name), prev);
+  const grown = data.groups.filter((g) => !isAbsentGroup(g))
+    .reduce((a, b) => (groupAmount(b.name) - prevGroup(b.name) > groupAmount(a.name) - prevGroup(a.name) ? b : a));
+  const grownBy = groupAmount(grown.name) - prevGroup(grown.name);
   const absent = data.categories.find(isAmount);
   const related = absent ? absent.items.reduce((s, i) => s + i.amounts[data.baseYear], 0) : 0;
 
@@ -336,8 +339,8 @@ function renderPoints() {
       `「${top.detail || top.name}」 사업 하나가 ${data.baseLabel} 전체(${won(gov)})의 ${Math.round((top.amounts[data.baseYear] / gov) * 100)}%, ${won(top.amounts[data.baseYear])}을 차지합니다.`],
     safety && [`1 : ${Math.round(groupAmount(biggest.name) / safety)}`,
       `안전·신뢰에 1원을 쓸 때 ${biggest.name}에는 약 ${Math.round(groupAmount(biggest.name) / safety)}원을 씁니다. 안전·신뢰는 ${won(safety)}, 전체의 ${percentOf(safety, gov)}%입니다.`],
-    base(shrunk) < prev(shrunk) && [`${Math.round(((base(shrunk) - prev(shrunk)) / prev(shrunk)) * 100)}%`.replace('-', '−'),
-      `과기정통부 AI 예산이 ${prevYear()}년보다 ${Math.round(((gov - before) / before) * 100)}% 늘어나는 동안 그 안의 「${shrunk.name}」 분야는 ${won(prev(shrunk))}에서 ${won(base(shrunk))}으로 가장 많이 줄었습니다. 다만 같은 일을 하는 사업이 다른 부처 예산에 편성될 수 있어, 정부 전체에서 줄었다는 뜻은 아닙니다.`],
+    gov > before && [`${Math.round((grownBy / (gov - before)) * 100)}%`,
+      `${prevYear()}년보다 늘어난 ${won(gov - before)} 가운데 ${Math.round((grownBy / (gov - before)) * 100)}%인 ${won(grownBy)}이 ${grown.name}에 들어갔습니다.`],
     absent && ['0원',
       `과기정통부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
   ].filter(Boolean);
