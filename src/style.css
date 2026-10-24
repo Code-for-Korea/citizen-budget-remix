@@ -863,16 +863,7 @@ button:disabled {
   margin: 0 0 8px;
 }
 
-.group > .group-total {
-  margin: 4px 0 12px;
-  color: var(--fg);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
 
-.group > .group-total:empty {
-  display: none;
-}
 
 /* 좁은 화면: 대분류마다 화면 폭 전체에 그 색을 옅게 깐 판과 위쪽 굵은 색 띠를 둬서, 스크롤하다 대분류가 바뀌면 바로 보이게 한다 */
 @media (max-width: 640px) {
@@ -938,16 +929,6 @@ button:disabled {
   margin-right: 8px;
   background: var(--group-color);
   vertical-align: -1px;
-}
-
-.amounts {
-  font-variant-numeric: tabular-nums;
-}
-
-.amounts .mine {
-  font-size: 1.15rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
 }
 
 /* 정부안에 없는 칸: 시민이 채울 빈칸이라 빨간 점선으로 두른다 */
@@ -1038,6 +1019,41 @@ button:disabled {
 
 .yoy-amount {
   text-align: right;
+}
+
+/* 내 예산: 빨간 펜으로 강조한다 */
+.yoy-row.mine {
+  margin-top: 2px;
+}
+
+.yoy-row.mine .yoy-label {
+  color: var(--red);
+  font-weight: 900;
+}
+
+.yoy-row.mine .yoy-bar {
+  height: 8px;
+}
+
+.yoy-row.mine .yoy-bar i {
+  background: var(--red);
+}
+
+.yoy-row.mine .yoy-amount {
+  color: var(--fg);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.yoy-diff {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+}
+
+.yoy-diff:empty {
+  display: none;
 }
 
 .yoy-row.after .yoy-label,
