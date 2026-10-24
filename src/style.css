@@ -985,7 +985,7 @@ button:disabled {
 
 .yoy-row {
   display: grid;
-  grid-template-columns: 7.5em 1fr 5.5em;
+  grid-template-columns: 7.5em 1fr 8.5em; /* 금액 칸은 크게 쓰는 내 예산(예: 7조 5,949억)까지 들어가게 */
   align-items: center;
   gap: 8px;
   margin: 0;
@@ -1041,7 +1041,7 @@ button:disabled {
 
 .yoy-row.mine .yoy-amount {
   color: var(--fg);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 900;
   letter-spacing: -0.02em;
 }
@@ -1110,6 +1110,26 @@ button:disabled {
   pointer-events: none;
 }
 
+/* 이 단계를 고른 시민 예산안 수 */
+.level-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  padding: 0 4px;
+  background: var(--red);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-count:empty {
+  display: none;
+}
+
 .level-note {
   font-size: 0.7rem;
   font-weight: 500;
@@ -1146,16 +1166,6 @@ button:disabled {
   color: #ffffff;
 }
 
-.scale {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 4px 12px;
-  font-size: 0.8rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
 
 /* 시민 예산안들이 이 분야를 어떻게 골랐는지 */
 .tally {

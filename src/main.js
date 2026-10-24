@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240412';
-import { setupBoard } from './board.js?v=202610240412';
-import { setupShare } from './share.js?v=202610240412';
+import { el } from './dom.js?v=202610240415';
+import { setupBoard } from './board.js?v=202610240415';
+import { setupShare } from './share.js?v=202610240415';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240412';
+} from './budget.js?v=202610240415';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -110,8 +110,6 @@ function update() {
     const card = document.getElementById(`cat-${category.id}`);
     card.querySelector(`input[value="${values.get(category.id)}"]`).checked = true;
     setComparison(card.querySelector('.yoy'), mine(category), isAmount(category) ? category.max : 0);
-    card.querySelector('.share').textContent =
-      `전체 중 비중 ${percentOf(base(category), gov)}% → ${percentOf(mine(category), total)}%`;
   }
 
   data.groups.forEach((group, index) => {
@@ -214,6 +212,7 @@ function levelPicker(category) {
         input,
         el('span', { className: 'level-label', textContent: level.label }),
         level.note ? el('span', { className: 'level-note', textContent: level.note }) : null,
+        el('span', { className: 'level-count' }),
       );
     }),
   );
@@ -244,10 +243,19 @@ function talkButtons(target) {
 }
 
 // 시민 예산안들이 이 분야를 어떻게 골랐는지 센다. 고르지 않은 분야는 정부안 그대로(유지)로 친다.
+// 단계 버튼마다 그 단계를 고른 시민 예산안 수를 배지로 붙이고(0이면 숨긴다), 카드 아래에 증액·유지·감액 요약을 쓴다.
 function renderTallies(posts) {
   const budgets = posts.filter((p) => p.kind === 'budget').map((p) => parseBudget(p.budget));
   for (const category of data.categories) {
-    const node = document.querySelector(`#cat-${category.id} .tally`);
+    const card = document.getElementById(`cat-${category.id}`);
+    for (const label of card.querySelectorAll('.level')) {
+      const value = Number(label.querySelector('input').value);
+      const count = budgets.filter((budget) => budget.get(category.id) === value).length;
+      const badge = label.querySelector('.level-count');
+      badge.textContent = count || '';
+      badge.title = count ? `시민 예산안 ${count}개가 고른 단계` : '';
+    }
+    const node = card.querySelector('.tally');
     if (!budgets.length) {
       node.textContent = '';
       continue;
@@ -281,7 +289,6 @@ function categoryCard(category) {
     relatedNote(category),
     levelPicker(category),
     el('p', { className: 'tally' }),
-    el('div', { className: 'scale' }, el('span', { className: 'share' })),
     talkButtons(category.id),
     el('details', {},
       el('summary', { textContent: `${amount ? '관련 사업' : '세부사업'} ${category.items.length}개` }),
