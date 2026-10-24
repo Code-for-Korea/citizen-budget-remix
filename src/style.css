@@ -412,17 +412,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* 글자처럼 보이는 버튼: 대분류·분야의 '의견 N' */
-button.link {
-  margin-top: 8px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font-size: 0.9rem;
-  text-decoration: underline;
-}
-
 .share-status:empty {
   display: none;
 }
@@ -929,9 +918,43 @@ dialog .status {
   gap: 4px 12px;
 }
 
-.group-head .link,
-.scale .link {
-  margin: 0;
+/* 대분류·분야의 '의견 남기기'·'의견 보기 N' */
+.opinion-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+button.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-color: var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+button.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip .icon {
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.chip:hover .icon {
+  color: inherit;
+}
+
+.chip .num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .visually-hidden {

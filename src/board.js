@@ -4,7 +4,7 @@
 //
 // 홈과 의견·시민 예산안 페이지가 함께 쓴다. 페이지에 있는 다음 표시를 찾아 채운다.
 // - [data-board-list][data-kind]: 글 목록. data-limit이 있으면 최근 글만 그만큼 보여 준다.
-// - [data-opinions="대상"]: 그 대상의 의견 수. 누르면 의견 목록 모달을 연다.
+// - [data-opinions="대상"]: 누르면 그 대상의 의견 목록 모달을 연다. 안의 .num에 의견 수를 쓴다.
 // - [data-write="question|proposal"][data-target]: 글쓰기 버튼.
 // 의견의 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
@@ -305,8 +305,7 @@ export function setupBoard({ campaign, groups, categories, summarize, currentBud
       node.textContent = posts.filter((p) => p.kind === node.dataset.count).length;
     }
     for (const button of document.querySelectorAll('[data-opinions]')) {
-      const count = opinionsFor(button.dataset.opinions).length;
-      button.textContent = count ? `의견 ${count}` : '의견 남기기';
+      button.querySelector('.num').textContent = opinionsFor(button.dataset.opinions).length;
     }
     if (viewer.open) {
       if (viewing.post) viewing.post = posts.find((p) => p.id === viewing.post.id);
@@ -432,9 +431,7 @@ export function setupBoard({ campaign, groups, categories, summarize, currentBud
   document.addEventListener('click', (event) => {
     const opinions = event.target.closest('[data-opinions]');
     if (opinions) {
-      const target = opinions.dataset.opinions;
-      if (opinionsFor(target).length || !ready) openViewer({ target });
-      else openForm('question', { target });
+      openViewer({ target: opinions.dataset.opinions });
       return;
     }
     const write = event.target.closest('[data-write]');

@@ -161,11 +161,27 @@ function levelPicker(category) {
   );
 }
 
-// 의견 수를 보여 주고 누르면 그 대상의 의견 목록을 연다. 글자와 동작은 board.js가 채운다.
-function opinionButton(target) {
-  const button = el('button', { type: 'button', className: 'opinions link', textContent: '의견' });
-  button.dataset.opinions = target;
-  return button;
+// 줄 그림 아이콘. currentColor를 써서 버튼 글자색을 따른다.
+const ICONS = {
+  write: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  view: '<path d="M4 5h16v11H9l-5 4z"/>',
+};
+
+function icon(name) {
+  const span = el('span', { className: 'icon', ariaHidden: 'true' });
+  span.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">${ICONS[name]}</svg>`;
+  return span;
+}
+
+// 대상마다 '의견 남기기'와 '의견 보기 N'. 동작과 개수는 board.js가 맡는다.
+function opinionButtons(target) {
+  const write = el('button', { type: 'button', className: 'chip' }, icon('write'), '의견 남기기');
+  write.dataset.write = 'question';
+  write.dataset.target = target;
+  const view = el('button', { type: 'button', className: 'chip' },
+    icon('view'), '의견 보기 ', el('span', { className: 'num', textContent: '0' }));
+  view.dataset.opinions = target;
+  return el('span', { className: 'opinion-actions' }, write, view);
 }
 
 function categoryCard(category) {
@@ -184,7 +200,7 @@ function categoryCard(category) {
     levelPicker(category),
     el('div', { className: 'scale' },
       el('span', { className: 'share' }),
-      opinionButton(category.id),
+      opinionButtons(category.id),
     ),
     el('details', {},
       el('summary', { textContent: `설명과 ${amount ? '관련 사업' : '세부사업'} ${category.items.length}개` }),
@@ -331,7 +347,7 @@ function render() {
     const section = el('section', { className: `group${isAbsentGroup(group) ? ' absent' : ''}` },
       el('div', { className: 'group-head' },
         el('h2', { textContent: group.name }),
-        isAbsentGroup(group) ? null : opinionButton(`group:${group.name}`),
+        isAbsentGroup(group) ? null : opinionButtons(`group:${group.name}`),
       ),
       el('p', {},
         group.description,
