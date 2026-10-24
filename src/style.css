@@ -789,6 +789,13 @@ button:disabled {
   border: 3px dashed var(--red);
 }
 
+/* 분야 설명은 접지 않고 늘 보여 준다(세부사업 표만 접는다) */
+.category-description,
+.category .related {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
 /* 전년 예산 → 정부안 한 줄 */
 .yoy {
   margin: 4px 0 0;
