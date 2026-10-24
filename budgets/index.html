@@ -2,18 +2,21 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>시민 예산안 · 모두의 AI 예산 심의</title>
   <meta name="description" content="시민이 직접 짠 2027년 AI 예산안입니다.">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="../src/style.css?v=202610240124">
+  <link rel="stylesheet" href="../src/style.css?v=202610240125">
 </head>
 <body>
-  <nav class="site-nav" aria-label="사이트 메뉴">
-    <a href="../">예산안 짜기</a>
-    <a href="../budgets/" aria-current="page">시민 예산안</a>
-    <a href="../deliberation/">심의</a>
-  </nav>
+  <header class="gnb">
+    <a class="gnb-brand" href="../">모두의 AI 예산 <span>심의</span></a>
+    <nav class="gnb-menu" aria-label="사이트 메뉴">
+      <a href="../"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg><span>예산안 짜기</span></a>
+      <a href="../budgets/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg><span>시민 예산안</span></a>
+      <a href="../deliberation/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><span>심의</span></a>
+    </nav>
+  </header>
 
   <main class="board page">
     <h1>시민 예산안 <span class="count" data-count="budget"></span></h1>
@@ -29,6 +32,6 @@
     </section>
   </main>
 
-  <script type="module" src="../src/posts.js?v=202610240124"></script>
+  <script type="module" src="../src/posts.js?v=202610240125"></script>
 </body>
 </html>

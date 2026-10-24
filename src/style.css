@@ -124,39 +124,127 @@ a {
 }
 
 /* 넓은 화면에서도 본문 폭을 넘어 화면 양끝까지 칠한다(그림자로 칠하고 위아래는 잘라 낸다) */
-.site-nav,
+.gnb,
 .summary {
   box-shadow: 0 0 0 100vmax var(--band, var(--rule));
   clip-path: inset(0 -100vmax);
 }
 
-/* 상단 메뉴: 화면 폭 전체의 검은 띠 */
-.site-nav {
+/* GNB: 화면 폭 전체의 검은 띠. 왼쪽은 사이트 이름, 오른쪽은 메뉴. 좁은 화면에서는 메뉴가 아래 탭 바로 내려간다. */
+.gnb {
   display: flex;
-  gap: 0;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 16px;
   margin: 0 -16px;
-  padding: 0 8px;
+  padding: env(safe-area-inset-top) 16px 0;
   background: var(--rule);
-  overflow-x: auto;
+  color: var(--bg);
 }
 
-.site-nav a {
-  padding: 12px 10px 10px;
+.gnb-brand {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  color: inherit;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gnb-brand span {
+  margin-left: 4px;
+  padding: 0 4px;
+  border: 2px solid var(--red);
+  color: var(--red);
+  font-size: 0.8em;
+  line-height: 1.2;
+}
+
+.gnb-menu {
+  display: flex;
+}
+
+.gnb-menu a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px 8px;
   border-bottom: 4px solid transparent;
-  color: var(--bg);
+  color: inherit;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
   opacity: 0.7;
 }
 
-.site-nav a:hover {
+.gnb-menu a:hover {
   opacity: 1;
 }
 
-.site-nav a[aria-current="page"] {
+.gnb-menu a[aria-current="page"] {
   border-bottom-color: var(--red);
   opacity: 1;
+}
+
+.gnb-menu svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 좁은 화면: iOS 탭 바처럼 화면 아래에 붙인다. 아이콘 아래 이름, 지금 페이지는 빨간색. */
+@media (max-width: 640px) {
+  body {
+    padding-bottom: calc(64px + 56px + env(safe-area-inset-bottom));
+  }
+
+  /* 좁은 화면에서는 띠가 원래 화면 폭이다. clip-path가 아래에 고정한 탭 바까지 잘라 내지 않게 끈다. */
+  .gnb {
+    box-shadow: none;
+    clip-path: none;
+  }
+
+  .gnb-menu {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  .gnb-menu a {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 6px 0 4px;
+    border-bottom: 0;
+    color: var(--muted);
+    font-size: 0.7rem;
+    opacity: 1;
+  }
+
+  .gnb-menu a[aria-current="page"] {
+    color: var(--red);
+  }
+
+  .gnb-menu svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 /* 히어로 */
