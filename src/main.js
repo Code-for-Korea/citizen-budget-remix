@@ -1,12 +1,12 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240053';
-import { setupBoard } from './board.js?v=202610240053';
+import { el } from './dom.js?v=202610240058';
+import { setupBoard } from './board.js?v=202610240058';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240053';
+} from './budget.js?v=202610240058';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -341,9 +341,9 @@ function renderBars() {
   }
 }
 
-// 막대 조각이나 칸에 마우스를 올리거나 누르면 금액을 보여 준다.
-// 터치에서는 손가락을 뗄 때 pointerleave가 오는 브라우저도, 안 오는 브라우저도 있어서
-// 그것으로는 숨기지 않고, 스크롤을 시작하거나(pointercancel, scroll) 다른 곳을 누르면 숨긴다.
+// 막대 조각이나 칸에 마우스를 올리거나 탭하면 금액을 보여 준다.
+// 터치에서는 손가락을 대는 순간(pointerdown)이 아니라 탭(click)했을 때만 띄운다. 스크롤하려고 손가락을 댄 것은
+// 탭이 아니어서 팝오버가 뜨지 않는다. 띄운 팝오버는 손가락을 움직이거나, 어디든 스크롤하거나, 다른 곳을 누르면 숨긴다.
 function setupTooltip() {
   const tip = document.getElementById('tip');
   const hide = () => { tip.hidden = true; };
@@ -360,12 +360,12 @@ function setupTooltip() {
     tip.style.top = `${event.clientY + 16}px`;
   };
   for (const area of document.querySelectorAll('.bars, .waffle')) {
-    area.addEventListener('pointermove', show);
-    area.addEventListener('pointerdown', show);
+    area.addEventListener('pointermove', (event) => { if (event.pointerType !== 'touch') show(event); });
     area.addEventListener('pointerleave', (event) => { if (event.pointerType !== 'touch') hide(); });
-    area.addEventListener('pointercancel', hide);
+    area.addEventListener('click', show);
   }
-  window.addEventListener('scroll', hide, { passive: true });
+  document.addEventListener('touchmove', hide, { passive: true });
+  document.addEventListener('scroll', hide, { capture: true, passive: true });
   document.addEventListener('pointerdown', (event) => {
     if (!event.target.closest('.bars, .waffle')) hide();
   });
