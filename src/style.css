@@ -1076,10 +1076,10 @@ td .detail {
   pointer-events: none;
 }
 
-/* 대분류·분야의 '질문·제안 남기기'와 오른쪽 끝의 글 수 */
+/* 대분류·분야의 '질문·제안 남기기'와 그 바로 옆의 글 수 */
 .talk-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 6px;
   margin-top: 8px;
