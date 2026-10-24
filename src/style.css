@@ -859,10 +859,19 @@ button:disabled {
   font-size: 0.9rem;
 }
 
-.group-total {
+.group > .yoy {
+  margin: 0 0 8px;
+}
+
+.group > .group-total {
+  margin: 4px 0 12px;
   color: var(--fg);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.group > .group-total:empty {
+  display: none;
 }
 
 /* 좁은 화면: 대분류마다 화면 폭 전체에 그 색을 옅게 깐 판과 위쪽 굵은 색 띠를 둬서, 스크롤하다 대분류가 바뀌면 바로 보이게 한다 */

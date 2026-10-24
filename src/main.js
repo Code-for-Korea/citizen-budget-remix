@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240331';
-import { setupBoard } from './board.js?v=202610240331';
-import { setupShare } from './share.js?v=202610240331';
+import { el } from './dom.js?v=202610240335';
+import { setupBoard } from './board.js?v=202610240335';
+import { setupShare } from './share.js?v=202610240335';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240331';
+} from './budget.js?v=202610240335';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -102,11 +102,11 @@ function update() {
   }
 
   data.groups.forEach((group, index) => {
-    const [before, after, my] = [prev, base, mine].map((amount) => sum(members(group), amount));
+    const [after, my] = [base, mine].map((amount) => sum(members(group), amount));
+    // 전년 대비는 render()의 막대가 보여 준다. 여기서는 내 예산이 정부안과 다를 때만 덧붙인다.
     document.getElementById(`group-total-${index}`).textContent = isAbsentGroup(group)
       ? `내 예산 ${won(my)}`
-      : `${prevYear()}년 ${won(before)} → ${data.baseLabel} ${won(after)} · ${growth(before, after)}`
-        + (my === after ? '' : ` · 내 예산 ${won(my)}`);
+      : my === after ? '' : `내 예산 ${won(my)} · 정부안보다 ${signed(my - after)}`;
   });
 }
 
@@ -141,10 +141,9 @@ function relatedNote(category) {
     el('strong', { textContent: `관련 사업 ${category.items.length}개를 모두 더해도 ${won(related)}, ${data.baseLabel} 전체의 ${percentOf(related, gov)}%입니다.` }));
 }
 
-// 전년 예산과 정부안을 같은 축척의 막대 두 개로 견주고, 증감을 색 칩으로 붙인다.
+// 전년 예산과 정부안을 같은 축척의 막대 두 개로 견주고, 증감을 색 칩으로 붙인다. 분야 카드와 대분류 머리가 함께 쓴다.
 // 정부안에 없는 칸은 두 해 모두 0원이라 쓰지 않는다.
-function yearOverYear(category) {
-  const [before, after] = [prev(category), base(category)];
+function yearOverYear(before, after) {
   const diff = after - before;
   const same = Math.round(diff / 100) === 0;
   const rate = before ? `${diff > 0 ? '+' : '−'}${Math.round((Math.abs(diff) / before) * 100)}%` : '새로 생김';
@@ -251,7 +250,7 @@ function categoryCard(category) {
         el('span', { className: 'change mine-diff' }),
       ),
     ),
-    amount ? null : yearOverYear(category),
+    amount ? null : yearOverYear(prev(category), base(category)),
     el('p', { className: 'category-description', textContent: category.description }),
     relatedNote(category),
     levelPicker(category),
@@ -433,11 +432,9 @@ function render() {
         el('h2', { textContent: group.name }),
         isAbsentGroup(group) ? null : talkButtons(`group:${group.name}`),
       ),
-      el('p', {},
-        group.description,
-        el('br'),
-        el('span', { className: 'group-total', id: `group-total-${index}` }),
-      ),
+      el('p', {}, group.description),
+      isAbsentGroup(group) ? null : yearOverYear(sum(members(group), prev), sum(members(group), base)),
+      el('p', { className: 'group-total', id: `group-total-${index}` }),
       ...members(group).map(categoryCard),
     );
     section.style.setProperty('--group-color', groupColor(group));
