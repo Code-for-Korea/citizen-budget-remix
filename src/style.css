@@ -445,7 +445,7 @@ a {
 
 .cell.absent {
   background: transparent;
-  outline: 2px dashed var(--red);
+  outline: 2px dashed var(--group-color);
   outline-offset: -2px;
 }
 
@@ -495,7 +495,7 @@ a {
 .group.absent h2::before {
   box-sizing: border-box;
   background: transparent;
-  border: 2px solid var(--red);
+  border: 2px solid var(--group-color);
 }
 
 .hero-actions {
@@ -700,7 +700,7 @@ a {
 }
 
 .seg.absent {
-  background: repeating-linear-gradient(45deg, var(--red) 0 3px, transparent 3px 6px);
+  background: repeating-linear-gradient(45deg, var(--group-color) 0 3px, transparent 3px 6px);
 }
 
 .highlights {
@@ -941,11 +941,11 @@ button:disabled {
   vertical-align: -1px;
 }
 
-/* 정부안에 없는 칸: 시민이 채울 빈칸이라 빨간 점선으로 두른다 */
+/* 정부안에 없는 칸: 시민이 채울 빈칸이라 그 대분류 색(보라) 점선으로 두른다 */
 .category.absent {
   margin-top: 8px;
   padding: 18px 16px 20px;
-  border: 3px dashed var(--red);
+  border: 3px dashed var(--group-color);
 }
 
 /* 분야 설명은 접지 않고 늘 보여 준다(세부사업 표만 접는다) */
