@@ -964,10 +964,11 @@ button:disabled {
   font-size: 0.9rem;
 }
 
-/* 전년 예산과 정부안 막대 비교. 막대 둘은 같은 축척이다. */
+/* 전년 예산과 정부안 막대 비교. 막대 둘은 같은 축척이다. 넓은 화면에서도 휑하지 않게 폭을 묶는다. */
 .yoy {
-  margin: 10px 0 0;
-  font-size: 0.8rem;
+  max-width: 420px;
+  margin: 8px 0 0;
+  font-size: 0.75rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -975,13 +976,13 @@ button:disabled {
 .yoy-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-bottom: 2px;
   font-weight: 700;
 }
 
 .yoy-chip {
-  padding: 1px 8px;
+  padding: 0 6px;
   background: var(--surface);
   color: var(--fg);
   font-weight: 600;
@@ -1006,11 +1007,12 @@ button:disabled {
   grid-template-columns: 7.5em 1fr 5.5em;
   align-items: center;
   gap: 8px;
-  margin: 3px 0;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .yoy-bar {
-  height: 10px;
+  height: 6px;
   background: color-mix(in srgb, var(--fg) 6%, transparent);
 }
 
