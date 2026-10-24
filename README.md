@@ -57,7 +57,8 @@ ruby -run -e httpd . -p 8000
 
 ```text
 index.html                      홈: 예산 조절 화면과 최근 글
-favicon.svg                     사이트 아이콘
+favicon.svg                     사이트 아이콘(apple-touch-icon.png는 홈 화면 아이콘)
+og.png                          링크 미리보기 이미지(1200×630)
 CLAUDE.md                       이 저장소에서 일할 때 지키는 규칙(반영·버전 번호·DB)
 budgets/index.html              시민 예산안 페이지
 deliberation/index.html         시민 심의(질문·제안) 페이지
@@ -125,6 +126,8 @@ GitHub Pages는 파일을 브라우저에 10분 동안 캐시하게 해서, 배�
 ## 만든 사람
 
 권오현(Ohyeon Kweon, [github.com/rest515](https://github.com/rest515))이 만들었습니다. 제안이나 고칠 점은 이 저장소의 이슈로 남겨 주세요.
+
+함께 이야기하려면 [코드포코리아 디스코드](https://discord.gg/xNNvfhJUV5)에 들어오세요.
 
 ## 라이선스
 

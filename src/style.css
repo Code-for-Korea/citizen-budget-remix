@@ -1739,6 +1739,25 @@ footer {
   color: var(--muted);
 }
 
+/* 모든 페이지 맨 아래: 디스코드와 만든 사람. 홈에서는 출처(#source) 바로 아래에 온다. */
+.site-footer {
+  margin-top: 32px;
+}
+
+#source + .tip + .site-footer {
+  margin-top: 16px;
+  border-top-width: 1px;
+}
+
+.site-footer p {
+  margin: 4px 0;
+}
+
+.site-footer a {
+  color: var(--fg);
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fill,
   .seg {

@@ -13,11 +13,11 @@
 // - [data-count="talk|budget"]: 글 수.
 // 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240402';
-import { el } from './dom.js?v=202610240402';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240404';
+import { el } from './dom.js?v=202610240404';
 import {
   data, levels, levelOf, isAmount, base, won, signed, sum, budgetPairs, parseBudget, proposalText, summarize,
-} from './budget.js?v=202610240402';
+} from './budget.js?v=202610240404';
 
 const SESSION_KEY = 'board-session';
 const NAME_KEY = 'board-name';
