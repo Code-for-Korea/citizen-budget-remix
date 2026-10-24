@@ -45,6 +45,11 @@
   box-sizing: border-box;
 }
 
+/* 두 번 탭해 확대하지 않는다(두 손가락 확대는 dom.js와 viewport가 막는다) */
+html {
+  touch-action: manipulation;
+}
+
 body {
   margin: 0 auto;
   max-width: 760px;
@@ -333,6 +338,12 @@ h3 {
 }
 
 @media (max-width: 480px) {
+  .summary .actions button {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
   .summary dl {
     gap: 4px 12px;
   }
@@ -796,18 +807,61 @@ td .detail {
   white-space: nowrap;
 }
 
+/* 모달은 화면 아래에서 올라오는 시트로 연다 */
 dialog {
-  width: min(560px, calc(100% - 32px));
-  max-height: calc(100% - 32px);
-  padding: 20px;
+  width: min(640px, 100%);
+  max-width: 100%;
+  max-height: 85dvh;
+  margin: auto auto 0;
+  padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
   background: var(--bg);
   color: var(--fg);
+  overscroll-behavior: contain;
+}
+
+dialog[open] {
+  animation: sheet-up 0.25s ease-out;
 }
 
 dialog::backdrop {
   background: rgb(0 0 0 / 0.5);
+}
+
+dialog[open]::backdrop {
+  animation: fade-in 0.25s ease-out;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 우상단 닫기 버튼. 내용을 내려도 따라온다. */
+.dialog-close {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  float: right;
+  width: 36px;
+  height: 36px;
+  margin: 0 0 -36px 8px; /* 첫 줄 오른쪽에만 자리를 차지한다(아래 제목 줄이 그만큼 비운다) */
+  padding: 0;
+  border-color: var(--line);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 1.4rem;
+  line-height: 1;
 }
 
 dialog h2 {
@@ -833,6 +887,7 @@ dialog textarea {
   background: var(--surface);
   color: var(--fg);
   font: inherit;
+  font-size: 1rem; /* 16px보다 작으면 iOS가 입력할 때 화면을 확대한다 */
   font-weight: 400;
 }
 
@@ -914,9 +969,6 @@ dialog .status {
 }
 
 /* 질문·의견·제안 목록·상세 모달 */
-.talk-dialog {
-  width: min(640px, calc(100% - 32px));
-}
 
 .tabs {
   display: flex;
@@ -953,6 +1005,11 @@ dialog .status {
   padding: 8px 12px;
   border-radius: 6px;
   background: var(--surface);
+}
+
+.viewer-bar,
+#post-dialog-title {
+  padding-right: 44px;
 }
 
 .viewer-bar {
@@ -1102,7 +1159,9 @@ footer {
   }
 
   .stamp,
-  .cell {
+  .cell,
+  dialog[open],
+  dialog[open]::backdrop {
     animation: none;
   }
 }

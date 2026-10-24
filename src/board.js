@@ -188,6 +188,13 @@ function proposalSummary(post) {
   return Math.round(diff / 100) ? `${name} · ${signed(diff)}` : `${name} · 정부안 그대로`;
 }
 
+// 모달 우상단의 닫기 버튼.
+function closeButton(dialog) {
+  const button = el('button', { type: 'button', className: 'dialog-close', textContent: '×', onclick: () => dialog.close() });
+  button.setAttribute('aria-label', '닫기');
+  return button;
+}
+
 // 글쓰기 창. 페이지마다 같은 모양이라 HTML에 두지 않고 여기서 만든다.
 function formDialog() {
   const field = (label, control, className = '') => el('label', { className }, label, ' ', control);
@@ -213,6 +220,7 @@ function formDialog() {
       ),
     ),
   );
+  dialog.prepend(closeButton(dialog));
   dialog.setAttribute('aria-labelledby', 'post-dialog-title');
   return dialog;
 }
@@ -323,13 +331,13 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
 
   function renderViewer() {
     const { target, kind, post } = viewing;
-    const close = el('button', { type: 'button', className: 'secondary close', textContent: '닫기', onclick: () => viewer.close() });
+    const close = closeButton(viewer);
     const where = target === 'all' ? '모든' : `「${targetName(target)}」`;
     if (post) {
       viewer.replaceChildren(...[
+        close,
         el('div', { className: 'viewer-bar' },
-          el('button', { type: 'button', className: 'secondary', textContent: '← 목록', onclick: () => openViewer({ target, kind }) }),
-          close),
+          el('button', { type: 'button', className: 'secondary', textContent: '← 목록', onclick: () => openViewer({ target, kind }) })),
         el('p', { className: `kind-badge ${post.kind}`, textContent: `${KINDS[post.kind].icon} ${KINDS[post.kind].label}` }),
         el('h2', { className: 'post-title', textContent: post.title }),
         el('p', { className: 'post-meta', textContent: meta(post) }),
@@ -356,9 +364,9 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
       return button;
     };
     viewer.replaceChildren(...[
+      close,
       el('div', { className: 'viewer-bar' },
-        el('h2', { textContent: `${where} 질문·의견·제안` }),
-        close),
+        el('h2', { textContent: `${where} 질문·의견·제안` })),
       el('div', { className: 'tabs' }, tab('all', '전체'), ...TALK.map((k) => tab(k, KINDS[k].label))),
       el('div', { className: 'actions' },
         el('button', {
