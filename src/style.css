@@ -626,7 +626,7 @@ td .detail {
   pointer-events: none;
 }
 
-/* 시민 심의 게시판: 의견은 GitHub의 이슈, 시민 예산안은 풀 리퀘스트처럼 목록에 쌓인다 */
+/* 시민 심의 게시판: 질문·제안은 GitHub의 이슈, 시민 예산안은 풀 리퀘스트처럼 목록에 쌓인다 */
 .board {
   margin: 56px 0 0;
 }
@@ -755,7 +755,7 @@ td .detail {
   list-style: none;
 }
 
-/* 의견은 줄 전체가 모달을 여는 버튼이다 */
+/* 질문·제안은 줄 전체가 모달을 여는 버튼이다 */
 .post-open {
   flex: 1;
   min-width: 0;
@@ -907,7 +907,7 @@ dialog .status {
   font-size: 0.9rem;
 }
 
-/* 글쓰기 창: 시민 예산안은 대상이 없고, 단계 고르기는 제안에만, 종류 고르기는 새 질문·의견·제안에만 보인다 */
+/* 글쓰기 창: 시민 예산안은 대상이 없고, 단계 고르기는 제안에만, 종류 고르기는 새 질문·제안에만 보인다 */
 #post-form[data-kind="budget"] .category-field,
 #post-form:not([data-kind="proposal"]) .level-field,
 #post-form[data-fixed="true"] .kind-field {
@@ -968,7 +968,7 @@ dialog .status {
   font-weight: 400;
 }
 
-/* 질문·의견·제안 목록·상세 모달 */
+/* 질문·제안 목록·상세 모달 */
 
 .tabs {
   display: flex;

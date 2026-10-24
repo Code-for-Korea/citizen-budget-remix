@@ -1,23 +1,23 @@
-// 시민 심의 게시판. 글은 네 종류다.
-// - 질문(question)·의견(opinion): 금액 없이 예산안 전체, 대분류, 분야에 남기는 글
+// 시민 심의 게시판. 글은 세 종류다.
+// - 질문(question): 금액 없이 예산안 전체, 대분류, 분야에 남기는 글
 // - 제안(proposal): 대분류나 분야 하나를 얼마나 늘리거나 줄일지(다섯 단계)와 그 이유
 // - 시민 예산안(budget): 홈에서 모든 분야를 골라 짠 예산 묶음
 // Supabase의 REST API를 fetch로 직접 부른다. 읽기는 누구나 하고, 글을 처음 쓸 때 익명 세션을 만들어
 // 이 브라우저에 보관한다. 같은 브라우저에서만 자기 글을 고치거나 지울 수 있다.
 //
 // 홈과 시민 예산안·심의 페이지가 함께 쓴다. 페이지에 있는 다음 표시를 찾아 채운다.
-// - [data-board-list][data-kind="talk|budget"]: 글 목록. talk는 질문·의견·제안이다. data-limit이 있으면 최근 글만 보여 준다.
+// - [data-board-list][data-kind="talk|budget"]: 글 목록. talk는 질문·제안이다. data-limit이 있으면 최근 글만 보여 준다.
 //   안에 [data-filter](대상), [data-kind-filter](종류) 고르기 칸이 있으면 그것으로 거른다.
-// - [data-talk="대상"]: 누르면 그 대상의 질문·의견·제안 모달을 연다. 안의 .num에 글 수를 쓴다.
-// - [data-write="question|opinion|proposal|budget|"][data-target]: 글쓰기 버튼. 빈 값이면 쓰는 사람이 종류를 고른다.
+// - [data-talk="대상"]: 누르면 그 대상의 질문·제안 모달을 연다. 안의 .num에 글 수를 쓴다.
+// - [data-write="question|proposal|budget|"][data-target]: 글쓰기 버튼. 빈 값이면 쓰는 사람이 종류를 고른다.
 // - [data-count="talk|budget"]: 글 수.
 // 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240104';
-import { el } from './dom.js?v=202610240104';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202610240109';
+import { el } from './dom.js?v=202610240109';
 import {
   data, levels, levelOf, isAmount, base, won, signed, sum, budgetPairs, parseBudget, proposalText, summarize,
-} from './budget.js?v=202610240104';
+} from './budget.js?v=202610240109';
 
 const SESSION_KEY = 'board-session';
 const NAME_KEY = 'board-name';
@@ -30,11 +30,6 @@ const KINDS = {
     icon: '?',
     hint: '궁금한 점이나 따져 묻고 싶은 점을 적어 주세요.',
   },
-  opinion: {
-    label: '의견',
-    icon: '“',
-    hint: '예산안에 대한 의견을 적어 주세요.',
-  },
   proposal: {
     label: '제안',
     icon: '±',
@@ -46,9 +41,9 @@ const KINDS = {
     hint: '지금 화면에서 짠 내 예산을 시민 예산안으로 냅니다.',
   },
 };
-const TALK = ['question', 'opinion', 'proposal'];
+const TALK = ['question', 'proposal'];
 const EMPTY = {
-  talk: '아직 남긴 질문·의견·제안이 없습니다. 첫 글을 남겨 보세요.',
+  talk: '아직 남긴 질문·제안이 없습니다. 첫 글을 남겨 보세요.',
   budget: '아직 낸 시민 예산안이 없습니다. 내 예산을 짜서 첫 시민 예산안으로 내 보세요.',
 };
 
@@ -255,7 +250,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
   }));
   const dialog = formDialog();
   const viewer = el('dialog', { className: 'talk-dialog' });
-  viewer.setAttribute('aria-label', '질문·의견·제안');
+  viewer.setAttribute('aria-label', '질문·제안');
   document.body.append(dialog, viewer);
   const form = dialog.querySelector('form');
   const formStatus = dialog.querySelector('#post-status');
@@ -303,7 +298,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
     return el('span', { className: `post-icon ${post.kind}`, textContent: KINDS[post.kind].icon, ariaHidden: 'true' });
   }
 
-  // 질문·의견·제안 한 줄. 누르면 모달에서 자세히 본다.
+  // 질문·제안 한 줄. 누르면 모달에서 자세히 본다.
   function talkRow(post, onclick) {
     return el('li', { className: `post ${post.kind}`, id: `post-${post.id}` }, icon(post),
       el('button', { type: 'button', className: 'post-open', onclick },
@@ -366,7 +361,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
     viewer.replaceChildren(...[
       close,
       el('div', { className: 'viewer-bar' },
-        el('h2', { textContent: `${where} 질문·의견·제안` })),
+        el('h2', { textContent: `${where} 질문·제안` })),
       el('div', { className: 'tabs' }, tab('all', '전체'), ...TALK.map((k) => tab(k, KINDS[k].label))),
       el('div', { className: 'actions' },
         el('button', {
@@ -463,7 +458,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
   function openForm(kind, { post = null, target = '' } = {}) {
     if (!ready) return;
     editing = post;
-    const nextKind = kind || 'opinion';
+    const nextKind = kind || 'question';
     draftBudget = post ? post.budget : nextKind === 'budget' ? currentBudget() : '';
     if (nextKind === 'budget' && !draftBudget) {
       notice('budget', '먼저 홈에서 분야마다 증액·감액을 골라 내 예산을 짠 다음 시민 예산안으로 내 주세요.');
@@ -480,7 +475,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
     applyKind(nextKind, pairs ? [...pairs.values()][0] : undefined);
     document.getElementById('post-dialog-title').textContent = post
       ? `${KINDS[nextKind].label} 고치기`
-      : nextKind === 'budget' ? '시민 예산안 내기' : '질문·의견·제안 남기기';
+      : nextKind === 'budget' ? '시민 예산안 내기' : '질문·제안 남기기';
     formStatus.textContent = '';
     dialog.showModal();
   }
@@ -537,7 +532,7 @@ export function setupBoard({ currentBudget = () => '', loadBudget, applyBudget, 
     }
   }
 
-  // 올린 글을 보여 준다. 질문·의견·제안은 모달에서, 시민 예산안은 목록에서 펼친다.
+  // 올린 글을 보여 준다. 질문·제안은 모달에서, 시민 예산안은 목록에서 펼친다.
   function show(post) {
     if (TALK.includes(post.kind)) {
       const keep = viewing && viewer.open;

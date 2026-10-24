@@ -1,12 +1,12 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240104';
-import { setupBoard } from './board.js?v=202610240104';
+import { el } from './dom.js?v=202610240109';
+import { setupBoard } from './board.js?v=202610240109';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240104';
+} from './budget.js?v=202610240109';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -189,7 +189,7 @@ function talkButtons(target) {
   const view = el('button', { type: 'button', className: 'chip count-chip' },
     icon('view'), el('span', {}, el('span', { className: 'num', textContent: '0' }), '개'));
   view.dataset.talk = target;
-  view.setAttribute('aria-label', '남긴 질문·의견·제안 보기');
+  view.setAttribute('aria-label', '남긴 질문·제안 보기');
   return el('div', { className: 'talk-actions' }, write, view);
 }
 
