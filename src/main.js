@@ -342,12 +342,15 @@ function renderBars() {
 }
 
 // 막대 조각이나 칸에 마우스를 올리거나 누르면 금액을 보여 준다.
+// 터치에서는 손가락을 뗄 때 pointerleave가 오는 브라우저도, 안 오는 브라우저도 있어서
+// 그것으로는 숨기지 않고, 스크롤을 시작하거나(pointercancel, scroll) 다른 곳을 누르면 숨긴다.
 function setupTooltip() {
   const tip = document.getElementById('tip');
+  const hide = () => { tip.hidden = true; };
   const show = (event) => {
     const mark = event.target.closest('[data-tip]');
     if (!mark) {
-      tip.hidden = true;
+      hide();
       return;
     }
     tip.textContent = mark.dataset.tip;
@@ -359,8 +362,13 @@ function setupTooltip() {
   for (const area of document.querySelectorAll('.bars, .waffle')) {
     area.addEventListener('pointermove', show);
     area.addEventListener('pointerdown', show);
-    area.addEventListener('pointerleave', () => { tip.hidden = true; });
+    area.addEventListener('pointerleave', (event) => { if (event.pointerType !== 'touch') hide(); });
+    area.addEventListener('pointercancel', hide);
   }
+  window.addEventListener('scroll', hide, { passive: true });
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest('.bars, .waffle')) hide();
+  });
 }
 
 function renderTotals() {
