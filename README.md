@@ -67,6 +67,7 @@ supabase/migrations/            게시판 DB 스키마와 권한 규칙(SQL)
 campaigns/ai-2027/budget.json   2027년 AI 예산 데이터 (변환 스크립트가 만든다)
 campaigns/ai-2027/descriptions.json  출처·분류 설명 (사람이 쓴다)
 scripts/xlsx_to_json.py         원자료 엑셀을 budget.json으로 변환
+scripts/bump_version.py         배포 전에 CSS·JS·JSON 주소의 버전 번호(?v=)를 한꺼번에 바꿈
 ```
 
 ## 데이터 갱신
@@ -99,6 +100,14 @@ Supabase의 보안 점검(Advisors)은 `posts_public`을 「Security Definer Vie
 ## 배포
 
 저장소 루트를 그대로 GitHub Pages 같은 정적 호스팅에 올리면 됩니다.
+
+CSS·JS·JSON을 고친 커밋을 올리기 전에는 버전 번호를 바꿉니다.
+
+```bash
+python3 scripts/bump_version.py
+```
+
+GitHub Pages는 파일을 브라우저에 10분 동안 캐시하게 해서, 배포 직후에는 새 HTML과 예전 CSS·JS가 섞여 화면이 깨질 수 있습니다. 이 스크립트는 HTML과 JS가 부르는 파일 주소의 `?v=` 번호를 모두 지금 시각으로 바꿔, HTML이 늘 한 벌의 파일을 가리키게 합니다. 같은 모듈을 서로 다른 번호로 부르면 두 번 읽혀 따로 동작하므로 번호는 손으로 고치지 마세요. `python3 scripts/bump_version.py --check`는 모든 주소의 번호가 같은지 확인만 합니다.
 
 사이트 주소는 `budget.codefor.kr`이며 루트의 `CNAME` 파일에 적혀 있습니다. 이 주소가 동작하려면 codefor.kr의 DNS에 다음 레코드가 있어야 합니다.
 
