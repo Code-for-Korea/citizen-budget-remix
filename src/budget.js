@@ -2,7 +2,7 @@
 // 정부 분류의 칸은 정부안 대비 다섯 단계 중 하나를, 정부안에 없는 칸(input: 'amount')은 금액 다섯 단계 중 하나를 고른다.
 // 조절 값은 "c=id:값,..." 문자열로 주소의 해시와 시민 예산안에 담는다. 값은 퍼센트, 금액 칸은 억 원 단위다.
 
-const CAMPAIGN = new URL('../campaigns/ai-2027/budget.json?v=202610240058', import.meta.url);
+const CAMPAIGN = new URL('../campaigns/ai-2027/budget.json?v=202610240104', import.meta.url);
 
 // 국회 심사처럼 늘릴지 줄일지와 그 폭만 고른다. tone은 화면의 색(style.css의 .level.up/.down)이다.
 const PERCENT_LEVELS = [

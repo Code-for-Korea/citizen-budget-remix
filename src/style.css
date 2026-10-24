@@ -1074,15 +1074,23 @@ dialog .status {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 4px 12px;
 }
 
-/* 대분류·분야의 '남기기'·'질문·의견·제안 N' */
+/* 대분류·분야의 '질문·제안 남기기'와 오른쪽 끝의 글 수 */
 .talk-actions {
-  display: inline-flex;
-  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 6px;
+  margin-top: 6px;
+}
+
+.group-head .talk-actions {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  margin-top: 0;
 }
 
 button.chip {

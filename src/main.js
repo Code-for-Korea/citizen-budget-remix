@@ -1,12 +1,12 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240058';
-import { setupBoard } from './board.js?v=202610240058';
+import { el } from './dom.js?v=202610240104';
+import { setupBoard } from './board.js?v=202610240104';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240058';
+} from './budget.js?v=202610240104';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -181,15 +181,16 @@ function icon(name) {
   return span;
 }
 
-// 대상마다 '남기기'와 '질문·의견·제안 N'. 동작과 개수는 board.js가 맡는다.
+// 대상마다 왼쪽에 '질문·제안 남기기', 오른쪽 끝에 남긴 글 수. 글 수를 누르면 목록 모달이 열린다. 동작과 개수는 board.js가 맡는다.
 function talkButtons(target) {
-  const write = el('button', { type: 'button', className: 'chip' }, icon('write'), '남기기');
+  const write = el('button', { type: 'button', className: 'chip' }, icon('write'), '질문·제안 남기기');
   write.dataset.write = '';
   write.dataset.target = target;
-  const view = el('button', { type: 'button', className: 'chip' },
-    icon('view'), '질문·의견·제안 ', el('span', { className: 'num', textContent: '0' }));
+  const view = el('button', { type: 'button', className: 'chip count-chip' },
+    icon('view'), el('span', {}, el('span', { className: 'num', textContent: '0' }), '개'));
   view.dataset.talk = target;
-  return el('span', { className: 'talk-actions' }, write, view);
+  view.setAttribute('aria-label', '남긴 질문·의견·제안 보기');
+  return el('div', { className: 'talk-actions' }, write, view);
 }
 
 // 시민 예산안들이 이 분야를 어떻게 골랐는지 센다. 고르지 않은 분야는 정부안 그대로(유지)로 친다.
@@ -236,10 +237,8 @@ function categoryCard(category) {
     amount ? null : yearOverYear(category),
     levelPicker(category),
     el('p', { className: 'tally' }),
-    el('div', { className: 'scale' },
-      el('span', { className: 'share' }),
-      talkButtons(category.id),
-    ),
+    el('div', { className: 'scale' }, el('span', { className: 'share' })),
+    talkButtons(category.id),
     el('details', {},
       el('summary', { textContent: `설명과 ${amount ? '관련 사업' : '세부사업'} ${category.items.length}개` }),
       el('p', { textContent: category.description }),
