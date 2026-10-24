@@ -622,7 +622,8 @@ td .detail {
 
 /* 위에 붙어 있는 합계 영역에 가리지 않게 스크롤한다(--summary-height는 main.js가 잰다) */
 .board,
-.post {
+.post,
+.category {
   scroll-margin-top: calc(var(--summary-height, 0px) + 16px);
 }
 
@@ -724,8 +725,12 @@ td .detail {
   text-align: center;
 }
 
-.post.proposal .post-icon {
+.post-icon.budget {
   border-radius: 6px;
+}
+
+.post-icon.proposal {
+  border-style: dashed;
 }
 
 .post details {
@@ -847,13 +852,107 @@ dialog .status {
   font-size: 0.9rem;
 }
 
-#post-form[data-kind="proposal"] .category-field {
+/* 글쓰기 창: 시민 예산안은 대상이 없고, 단계 고르기는 제안에만, 종류 고르기는 새 질문·의견·제안에만 보인다 */
+#post-form[data-kind="budget"] .category-field,
+#post-form:not([data-kind="proposal"]) .level-field,
+#post-form[data-fixed="true"] .kind-field {
   display: none;
 }
 
-/* 의견 목록·상세 모달 */
-.opinions-dialog {
+#post-form fieldset {
+  margin: 12px 0;
+  padding: 0;
+  border: 0;
+}
+
+#post-form legend {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.kind-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kind-choice {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.kind-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kind-choice:has(input:checked) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.kind-choice:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.level-field .levels {
+  margin: 0;
+  --group-color: var(--accent);
+}
+
+.level-field .level {
+  margin: 0;
+  font-weight: 400;
+}
+
+/* 질문·의견·제안 목록·상세 모달 */
+.talk-dialog {
   width: min(640px, calc(100% - 32px));
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.tabs button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.tabs button[aria-pressed="true"] {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.kind-badge {
+  margin: 16px 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.proposal-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--surface);
 }
 
 .viewer-bar {
@@ -864,17 +963,21 @@ dialog .status {
   margin-bottom: 8px;
 }
 
+.viewer-bar button {
+  white-space: nowrap;
+}
+
 .viewer-bar h2 {
   margin: 0;
   font-size: 1.15rem;
 }
 
-.opinions-dialog > .post-title {
-  margin: 16px 0 0;
+.talk-dialog > .post-title {
+  margin: 4px 0 0;
   font-size: 1.25rem;
 }
 
-.opinions-dialog .actions:empty {
+.talk-dialog .actions:empty {
   display: none;
 }
 
@@ -918,8 +1021,8 @@ dialog .status {
   gap: 4px 12px;
 }
 
-/* 대분류·분야의 '의견 남기기'·'의견 보기 N' */
-.opinion-actions {
+/* 대분류·분야의 '남기기'·'질문·의견·제안 N' */
+.talk-actions {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -950,6 +1053,24 @@ button.chip:hover {
 
 .chip:hover .icon {
   color: inherit;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+/* 시민 예산안들이 이 분야를 어떻게 골랐는지 */
+.tally {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tally:empty {
+  display: none;
 }
 
 .chip .num {

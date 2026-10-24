@@ -91,28 +91,53 @@ function snap(category, raw) {
   return levels(category).reduce((a, b) => (Math.abs(b.value - raw) < Math.abs(a.value - raw) ? b : a)).value;
 }
 
-// "c=id:값,..." 문자열(주소의 해시나 시민 예산안)을 분야별 조절 값으로 읽는다.
-export function parseBudget(text) {
-  const budget = new Map(data.categories.map((c) => [c.id, initial(c)]));
-  const match = text.match(/c=([^&]*)/);
-  if (!match) return budget;
+// "c=id:값,..." 문자열에 적힌 분야만 읽는다. 제안처럼 일부 분야만 담은 문자열에 쓴다.
+export function budgetPairs(text) {
+  const pairs = new Map();
+  const match = (text || '').match(/c=([^&]*)/);
+  if (!match) return pairs;
   for (const pair of decodeURIComponent(match[1]).split(',')) {
     const [id, value] = pair.split(':');
     const category = data.categories.find((c) => c.id === id);
     const number = Number(value);
     if (category && Number.isFinite(number)) {
-      budget.set(id, snap(category, isAmount(category) ? number * 100 : number));
+      pairs.set(id, snap(category, isAmount(category) ? number * 100 : number));
     }
   }
+  return pairs;
+}
+
+// "c=id:값,..." 문자열(주소의 해시나 시민 예산안)을 모든 분야의 조절 값으로 읽는다. 적히지 않은 분야는 정부안 그대로다.
+export function parseBudget(text) {
+  const budget = new Map(data.categories.map((c) => [c.id, initial(c)]));
+  for (const [id, value] of budgetPairs(text)) budget.set(id, value);
   return budget;
+}
+
+function encode(categories, budget) {
+  return `c=${categories.map((c) => `${c.id}:${isAmount(c) ? budget.get(c.id) / 100 : budget.get(c.id)}`).join(',')}`;
 }
 
 // 정부안에서 바꾼 분야만 담는다. 바꾼 게 없으면 빈 문자열이다.
 export function budgetText(budget) {
-  const changed = data.categories
-    .filter((c) => budget.get(c.id) !== initial(c))
-    .map((c) => `${c.id}:${isAmount(c) ? budget.get(c.id) / 100 : budget.get(c.id)}`);
-  return changed.length ? `c=${changed.join(',')}` : '';
+  const changed = data.categories.filter((c) => budget.get(c.id) !== initial(c));
+  return changed.length ? encode(changed, budget) : '';
+}
+
+// 제안의 조절 값: 대상 분야(대분류면 그 아래 정부 분류 칸 모두)에 같은 단계를 적는다. '유지'도 적는다.
+export function proposalText(categories, value) {
+  return encode(categories, new Map(categories.map((c) => [c.id, value])));
+}
+
+// 지금 예산(text)에 제안(patch)의 값을 덮어쓴다.
+export function mergeBudget(text, patch) {
+  const budget = parseBudget(text);
+  for (const [id, value] of budgetPairs(patch)) budget.set(id, value);
+  return budgetText(budget);
+}
+
+export function levelOf(category, value) {
+  return levels(category).find((level) => level.value === value);
 }
 
 // 가장 많이 늘리고 줄인 분야를 알려 준다. 바꾼 분야가 없으면 빈 배열이다.

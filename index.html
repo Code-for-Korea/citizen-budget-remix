@@ -9,9 +9,9 @@
 </head>
 <body>
   <nav class="site-nav" aria-label="사이트 메뉴">
-    <a href="./" aria-current="page">홈</a>
-    <a href="opinions/">의견</a>
-    <a href="proposals/">시민 예산안</a>
+    <a href="./" aria-current="page">예산안 짜기</a>
+    <a href="budgets/">시민 예산안</a>
+    <a href="deliberation/">심의</a>
   </nav>
 
   <header class="intro">
@@ -28,7 +28,7 @@
 
     <div class="hero-actions">
       <a class="start" href="#summary">내 예산 짜러 가기 ↓</a>
-      <a class="start secondary" href="#board">의견·시민 예산안 보기</a>
+      <a class="start secondary" href="#board">시민 예산안·심의 보기</a>
     </div>
     <div class="facts" id="facts"></div>
   </header>
@@ -46,7 +46,7 @@
     <p class="highlights" id="highlights"></p>
     <div class="actions">
       <button type="button" id="share">링크 복사</button>
-      <button type="button" class="secondary" data-write="proposal">시민 예산안 내기</button>
+      <button type="button" class="secondary" data-write="budget">시민 예산안 내기</button>
       <button type="button" id="reset" class="secondary">처음으로</button>
     </div>
     <p class="share-status" id="share-status" role="status"></p>
@@ -58,26 +58,26 @@
 
   <section class="board" id="board" aria-labelledby="board-title">
     <h2 id="board-title">시민 심의 게시판</h2>
-    <p class="board-intro">예산안 전체나 대분류·분야마다 의견을 남기고, 내가 짠 예산을 시민 예산안으로 내 보세요. 남긴 글은 누구나 읽을 수 있습니다. 다른 사람의 시민 예산안을 불러와 고친 뒤 새 시민 예산안으로 낼 수도 있습니다.</p>
+    <p class="board-intro">위에서 짠 내 예산을 시민 예산안으로 내고, 다른 사람의 예산안을 불러와 고쳐 보세요. 예산안 전체나 대분류·분야마다 질문·의견·제안도 남길 수 있습니다. 제안은 대분류나 분야 하나를 얼마나 늘리거나 줄이자는 글입니다.</p>
 
-    <section class="board-list" data-board-list data-kind="question" data-limit="5" aria-labelledby="recent-opinions">
+    <section class="board-list" data-board-list data-kind="budget" data-limit="5" aria-labelledby="recent-budgets">
       <div class="board-bar">
-        <h3 id="recent-opinions">최근 의견 <span class="count" data-count="question"></span></h3>
+        <h3 id="recent-budgets">최근 시민 예산안 <span class="count" data-count="budget"></span></h3>
         <div class="board-actions">
-          <a href="opinions/">전체 보기</a>
-          <button type="button" data-write="question" data-target="">예산안 전체에 의견 남기기</button>
+          <a href="budgets/">전체 보기</a>
+          <button type="button" data-write="budget">시민 예산안 내기</button>
         </div>
       </div>
       <p class="status board-status" role="status"></p>
       <ol class="posts"></ol>
     </section>
 
-    <section class="board-list" data-board-list data-kind="proposal" data-limit="5" aria-labelledby="recent-proposals">
+    <section class="board-list" data-board-list data-kind="talk" data-limit="5" aria-labelledby="recent-talk">
       <div class="board-bar">
-        <h3 id="recent-proposals">최근 시민 예산안 <span class="count" data-count="proposal"></span></h3>
+        <h3 id="recent-talk">최근 질문·의견·제안 <span class="count" data-count="talk"></span></h3>
         <div class="board-actions">
-          <a href="proposals/">전체 보기</a>
-          <button type="button" data-write="proposal">시민 예산안 내기</button>
+          <a href="deliberation/">전체 보기</a>
+          <button type="button" data-write="" data-target="">남기기</button>
         </div>
       </div>
       <p class="status board-status" role="status"></p>

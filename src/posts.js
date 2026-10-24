@@ -1,7 +1,17 @@
-// 의견·시민 예산안 페이지: 캠페인 자료를 불러온 뒤 게시판 목록 하나를 채운다.
+// 시민 예산안·심의 페이지: 캠페인 자료를 불러온 뒤 게시판 목록을 채운다.
+// 예산을 짜는 화면은 홈에 있으므로, 불러오기와 반영은 홈으로 옮겨 가서 한다.
 
 import { setupBoard } from './board.js';
-import { data, loadCampaign, summarize } from './budget.js';
+import { loadCampaign, mergeBudget } from './budget.js';
+
+// 홈이 기억해 둔 마지막 예산(main.js의 SAVED_KEY).
+function saved() {
+  try {
+    return localStorage.getItem('my-budget') || '';
+  } catch {
+    return '';
+  }
+}
 
 async function start() {
   try {
@@ -11,12 +21,8 @@ async function start() {
     return;
   }
   setupBoard({
-    campaign: data.id,
-    groups: data.groups,
-    categories: data.categories,
-    summarize,
-    // 시민 예산안은 홈의 조절 화면에서 연다.
     loadBudget: (text) => { location.href = `../#${text}`; },
+    applyBudget: (text) => { location.href = `../#${mergeBudget(saved(), text)}`; },
   });
 }
 

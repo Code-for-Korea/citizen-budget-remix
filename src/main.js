@@ -5,10 +5,13 @@ import { el } from './dom.js';
 import { setupBoard } from './board.js';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
-  parseBudget, summarize, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
+  parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
 } from './budget.js';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
+
+// 다른 페이지에서 제안을 내 예산안에 반영할 때 이어 붙일 수 있도록 마지막 예산을 기억한다(posts.js).
+const SAVED_KEY = 'my-budget';
 
 const values = new Map();
 
@@ -45,6 +48,11 @@ function readHash() {
 function writeHash() {
   const text = budgetText();
   history.replaceState(null, '', location.pathname + location.search + (text ? `#${text}` : ''));
+  try {
+    localStorage.setItem(SAVED_KEY, text);
+  } catch {
+    // 기억하지 못해도 화면은 동작한다.
+  }
 }
 
 // 증감을 색과 함께 쓴다. 정부안에서 바꾸지 않았으면(diff가 0) 아무것도 쓰지 않는다.
@@ -173,15 +181,44 @@ function icon(name) {
   return span;
 }
 
-// 대상마다 '의견 남기기'와 '의견 보기 N'. 동작과 개수는 board.js가 맡는다.
-function opinionButtons(target) {
-  const write = el('button', { type: 'button', className: 'chip' }, icon('write'), '의견 남기기');
-  write.dataset.write = 'question';
+// 대상마다 '남기기'와 '질문·의견·제안 N'. 동작과 개수는 board.js가 맡는다.
+function talkButtons(target) {
+  const write = el('button', { type: 'button', className: 'chip' }, icon('write'), '남기기');
+  write.dataset.write = '';
   write.dataset.target = target;
   const view = el('button', { type: 'button', className: 'chip' },
-    icon('view'), '의견 보기 ', el('span', { className: 'num', textContent: '0' }));
-  view.dataset.opinions = target;
-  return el('span', { className: 'opinion-actions' }, write, view);
+    icon('view'), '질문·의견·제안 ', el('span', { className: 'num', textContent: '0' }));
+  view.dataset.talk = target;
+  return el('span', { className: 'talk-actions' }, write, view);
+}
+
+// 시민 예산안들이 이 분야를 어떻게 골랐는지 센다. 고르지 않은 분야는 정부안 그대로(유지)로 친다.
+function renderTallies(posts) {
+  const budgets = posts.filter((p) => p.kind === 'budget').map((p) => parseBudget(p.budget));
+  for (const category of data.categories) {
+    const node = document.querySelector(`#cat-${category.id} .tally`);
+    if (!budgets.length) {
+      node.textContent = '';
+      continue;
+    }
+    const counts = { up: 0, keep: 0, down: 0 };
+    for (const budget of budgets) {
+      const diff = budget.get(category.id) - initial(category);
+      counts[diff > 0 ? 'up' : diff < 0 ? 'down' : 'keep'] += 1;
+    }
+    node.textContent = `시민 예산안 ${budgets.length}개: 증액 ${counts.up} · 유지 ${counts.keep}`
+      + (isAmount(category) ? '' : ` · 감액 ${counts.down}`);
+  }
+}
+
+// 제안의 값을 지금 예산에 덮어쓰고 그 분야를 보여 준다.
+function applyBudget(text) {
+  const pairs = budgetPairs(text);
+  for (const [id, value] of pairs) values.set(id, value);
+  update();
+  writeHash();
+  const [first] = pairs.keys();
+  if (first) document.getElementById(`cat-${first}`).scrollIntoView();
 }
 
 function categoryCard(category) {
@@ -198,9 +235,10 @@ function categoryCard(category) {
     ),
     amount ? null : yearOverYear(category),
     levelPicker(category),
+    el('p', { className: 'tally' }),
     el('div', { className: 'scale' },
       el('span', { className: 'share' }),
-      opinionButtons(category.id),
+      talkButtons(category.id),
     ),
     el('details', {},
       el('summary', { textContent: `설명과 ${amount ? '관련 사업' : '세부사업'} ${category.items.length}개` }),
@@ -347,7 +385,7 @@ function render() {
     const section = el('section', { className: `group${isAbsentGroup(group) ? ' absent' : ''}` },
       el('div', { className: 'group-head' },
         el('h2', { textContent: group.name }),
-        isAbsentGroup(group) ? null : opinionButtons(`group:${group.name}`),
+        isAbsentGroup(group) ? null : talkButtons(`group:${group.name}`),
       ),
       el('p', {},
         group.description,
@@ -396,15 +434,13 @@ async function start() {
     document.documentElement.style.setProperty('--summary-height', `${summary.offsetHeight}px`);
   }).observe(summary);
   setupBoard({
-    campaign: data.id,
-    groups: data.groups,
-    categories: data.categories,
     currentBudget: () => budgetText(),
-    summarize,
     loadBudget: (text) => {
       location.hash = text;
       document.getElementById('summary').scrollIntoView();
     },
+    applyBudget,
+    onPosts: renderTallies,
   });
 
   document.getElementById('share').addEventListener('click', share);
