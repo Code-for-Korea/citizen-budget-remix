@@ -133,7 +133,6 @@ a {
 /* GNB: 화면 폭 전체의 검은 띠. 왼쪽은 사이트 이름, 오른쪽은 메뉴. 좁은 화면에서는 메뉴가 아래 탭 바로 내려간다. */
 .gnb {
   display: flex;
-  justify-content: space-between;
   align-items: stretch;
   gap: 16px;
   margin: 0 -16px;
@@ -164,6 +163,7 @@ a {
 
 .gnb-menu {
   display: flex;
+  margin-left: auto;
 }
 
 .gnb-menu a {
@@ -198,10 +198,59 @@ a {
   stroke-linejoin: round;
 }
 
-/* 좁은 화면: iOS 탭 바처럼 화면 아래에 붙인다. 아이콘 아래 이름, 지금 페이지는 빨간색. */
+/* GNB의 '공유' 버튼. 넓은 화면에서는 메뉴 옆에 메뉴처럼 놓인다. */
+.gnb-share {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: -8px;
+  padding: 12px 10px 8px;
+  border: 0;
+  border-bottom: 4px solid transparent;
+  background: none;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.gnb-share:hover {
+  border-color: transparent;
+  background: none;
+  color: inherit;
+  opacity: 1;
+}
+
+.gnb-share svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 링크를 복사했을 때 잠깐 뜨는 알림 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 4;
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  background: var(--rule);
+  color: var(--bg);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transform: translateX(-50%);
+  animation: fade-in 0.2s ease-out;
+  overflow-wrap: anywhere;
+}
+
+/* 좁은 화면: iOS의 글래스 탭 바처럼 화면 아래에 떠 있는 캡슐. 아이콘 아래 이름, 지금 페이지는 캡슐 안의 알약으로 강조한다.
+   공유 버튼은 캡슐 오른쪽에 따로 뜬 동그란 유리 버튼이다. */
 @media (max-width: 640px) {
   body {
-    padding-bottom: calc(64px + 56px + env(safe-area-inset-bottom));
+    padding-bottom: calc(64px + 80px + env(safe-area-inset-bottom));
   }
 
   /* 좁은 화면에서는 위쪽 띠를 없애고 아래 탭 바만 남긴다. clip-path가 탭 바까지 잘라 내지 않게 끈다. */
@@ -225,18 +274,31 @@ a {
     margin-top: calc(24px + env(safe-area-inset-top));
   }
 
-  .gnb-menu {
+  .gnb-menu,
+  .gnb-share {
+    --glass: color-mix(in srgb, var(--bg) 60%, transparent);
+    --glass-edge: rgb(255 255 255 / 0.55);
     position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    bottom: calc(10px + env(safe-area-inset-bottom));
     z-index: 3;
+    height: 62px;
+    border: 1px solid var(--glass-edge);
+    background: var(--glass);
+    color: var(--fg);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.6),
+      inset 0 -1px 0 rgb(0 0 0 / 0.04),
+      0 10px 30px rgb(0 0 0 / 0.18);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+
+  .gnb-menu {
+    left: 12px;
+    right: calc(12px + 62px + 8px);
     justify-content: space-around;
-    padding-bottom: env(safe-area-inset-bottom);
-    border-top: 1px solid var(--line);
-    background: color-mix(in srgb, var(--bg) 85%, transparent);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
+    padding: 4px;
+    border-radius: 999px;
   }
 
   .gnb-menu a {
@@ -244,21 +306,62 @@ a {
     flex-direction: column;
     justify-content: center;
     gap: 2px;
-    min-height: 56px;
-    padding: 6px 0 4px;
-    border-bottom: 0;
-    color: var(--muted);
-    font-size: 0.7rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    color: var(--fg);
+    font-size: 0.68rem;
     opacity: 1;
   }
 
   .gnb-menu a[aria-current="page"] {
+    background: color-mix(in srgb, var(--fg) 9%, transparent);
     color: var(--red);
   }
 
   .gnb-menu svg {
     width: 24px;
     height: 24px;
+  }
+
+  .gnb-share {
+    right: 12px;
+    justify-content: center;
+    width: 62px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    opacity: 1;
+  }
+
+  .gnb-share:hover {
+    border-color: var(--glass-edge);
+    background: var(--glass);
+    color: var(--fg);
+  }
+
+  .gnb-share svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .gnb-share span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+@media (max-width: 640px) and (prefers-color-scheme: dark) {
+  .gnb-menu,
+  .gnb-share {
+    --glass: color-mix(in srgb, var(--bg) 55%, transparent);
+    --glass-edge: rgb(255 255 255 / 0.14);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      0 10px 30px rgb(0 0 0 / 0.5);
   }
 }
 

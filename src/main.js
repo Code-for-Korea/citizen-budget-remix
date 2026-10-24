@@ -1,12 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240131';
-import { setupBoard } from './board.js?v=202610240131';
+import { el } from './dom.js?v=202610240140';
+import { setupBoard } from './board.js?v=202610240140';
+import { setupShare } from './share.js?v=202610240140';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240131';
+} from './budget.js?v=202610240140';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -426,6 +427,7 @@ async function share() {
 }
 
 async function start() {
+  setupShare();
   try {
     await loadCampaign();
   } catch {
