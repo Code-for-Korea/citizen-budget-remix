@@ -955,12 +955,84 @@ button:disabled {
   font-size: 0.9rem;
 }
 
-/* 전년 예산 → 정부안 한 줄 */
+/* 전년 예산과 정부안 막대 비교. 막대 둘은 같은 축척이다. */
 .yoy {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
+  margin: 10px 0 0;
+  font-size: 0.8rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+
+.yoy-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.yoy-chip {
+  padding: 1px 8px;
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.yoy-chip strong {
+  font-weight: 900;
+}
+
+.yoy-chip.up {
+  background: var(--up);
+  color: var(--bg);
+}
+
+.yoy-chip.down {
+  background: var(--down);
+  color: var(--bg);
+}
+
+.yoy-row {
+  display: grid;
+  grid-template-columns: 7.5em 1fr 5.5em;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0;
+}
+
+.yoy-bar {
+  height: 10px;
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.yoy-bar i {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+}
+
+.yoy-row.before .yoy-bar i {
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.yoy-row.after .yoy-bar i {
+  background: var(--group-color);
+}
+
+.yoy-label,
+.yoy-amount {
+  white-space: nowrap;
+}
+
+.yoy-amount {
+  text-align: right;
+}
+
+.yoy-row.after .yoy-label,
+.yoy-row.after .yoy-amount {
+  color: var(--fg);
+  font-weight: 800;
 }
 
 .change {
