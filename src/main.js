@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240435';
-import { setupBoard } from './board.js?v=202610240435';
-import { setupShare } from './share.js?v=202610240435';
+import { el } from './dom.js?v=202610240439';
+import { setupBoard } from './board.js?v=202610240439';
+import { setupShare } from './share.js?v=202610240439';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240435';
+} from './budget.js?v=202610240439';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -109,12 +109,11 @@ function update() {
   for (const category of data.categories) {
     const card = document.getElementById(`cat-${category.id}`);
     card.querySelector(`input[value="${values.get(category.id)}"]`).checked = true;
-    setComparison(card.querySelector('.yoy'), mine(category), isAmount(category) ? category.max : 0);
+    setComparison(card.querySelector('.yoy'), mine(category));
   }
 
   data.groups.forEach((group, index) => {
-    const floor = isAbsentGroup(group) ? sum(members(group), (c) => c.max) : 0;
-    setComparison(document.getElementById(`group-yoy-${index}`), sum(members(group), mine), floor);
+    setComparison(document.getElementById(`group-yoy-${index}`), sum(members(group), mine));
   });
 }
 
@@ -149,56 +148,55 @@ function relatedNote(category) {
     el('strong', { textContent: `관련 사업 ${category.items.length}개를 모두 더해도 ${won(related)}, ${data.baseLabel} 전체의 ${percentOf(related, gov)}%입니다.` }));
 }
 
-function yoyRow(label, className) {
-  return el('div', { className: `yoy-row ${className}` },
-    el('span', { className: 'yoy-label', textContent: label }),
-    el('span', { className: 'yoy-bar' }, el('i')),
-    el('span', { className: 'yoy-amount' }));
+// 증감 줄: 퍼센트와 금액을 각각 끊기지 않는 조각으로 써서, 줄바꿈은 둘 사이에서만 일어나게 한다.
+function setSub(node, parts) {
+  node.replaceChildren(...parts.flatMap((part, i) => [i ? ' · ' : '', el('span', { textContent: part })]));
 }
 
-// 전년 예산·정부안·내 예산을 같은 축척의 막대로 견준다. 칩은 정부안의 전년 대비 증감, 맨 아래 줄은 내 예산의 정부안 대비 증감이다.
-// 분야 카드와 대분류 머리가 함께 쓴다. 정부안에 없는 칸(withYear가 거짓)은 두 해 모두 0원이라 내 예산 줄만 둔다.
-// 막대 길이와 내 예산은 고를 때마다 setComparison()이 다시 그린다.
+function yoyCell(label, className) {
+  return el('div', { className: `yoy-cell ${className}` },
+    el('span', { className: 'yoy-label', textContent: label }),
+    el('strong', { className: 'yoy-amount' }),
+    el('span', { className: 'yoy-sub' }));
+}
+
+// 전년 예산·정부안·내 예산을 세 칸에 나란히 쓴다. 정부안 칸 아래는 전년 대비 증감, 내 예산 칸 아래는 정부안 대비 증감이다.
+// 분야 카드와 대분류 머리가 함께 쓴다. 정부안에 없는 칸(withYear가 거짓)은 두 해 모두 0원이라 내 예산 칸만 둔다.
+// 내 예산 칸은 고를 때마다 setComparison()이 다시 쓴다.
 function comparison(before, after, withYear = true) {
-  const nodes = [];
+  const cells = [];
   if (withYear) {
     const diff = after - before;
     const same = Math.round(diff / 100) === 0;
     const rate = before ? `${diff > 0 ? '+' : '−'}${Math.round((Math.abs(diff) / before) * 100)}%` : '새로 생김';
-    const chip = el('span', { className: `yoy-chip${same ? '' : diff > 0 ? ' up' : ' down'}` },
-      ...(same ? ['전년과 같음'] : [el('strong', { textContent: rate }), ` ${signed(diff)}`]));
-    nodes.push(
-      el('div', { className: 'yoy-head' }, el('span', { textContent: '전년 대비' }), chip),
-      yoyRow(`${prevYear()}년`, 'before'),
-      yoyRow(data.baseLabel, 'after'),
-    );
+    const beforeCell = yoyCell(`${prevYear()}년`, 'before');
+    const afterCell = yoyCell(data.baseLabel, 'after');
+    beforeCell.querySelector('.yoy-amount').textContent = won(before);
+    afterCell.querySelector('.yoy-amount').textContent = won(after);
+    const sub = afterCell.querySelector('.yoy-sub');
+    setSub(sub, same ? ['전년과 같음'] : [rate, signed(diff)]);
+    sub.classList.add('change');
+    sub.classList.toggle('up', !same && diff > 0);
+    sub.classList.toggle('down', !same && diff < 0);
+    cells.push(beforeCell, afterCell);
   }
-  nodes.push(yoyRow('내 예산', 'mine'), el('p', { className: 'yoy-diff change' }));
-  const node = el('div', { className: 'yoy' }, ...nodes);
-  node.dataset.before = before;
+  cells.push(yoyCell('내 예산', 'mine'));
+  const node = el('div', { className: `yoy${withYear ? '' : ' only-mine'}` }, ...cells);
   node.dataset.after = after;
   return node;
 }
 
-// floor: 막대 축척의 최솟값. 정부안에 없는 칸은 고를 수 있는 최대 금액을 쓴다.
-function setComparison(node, my, floor = 0) {
-  const before = Number(node.dataset.before);
+function setComparison(node, my) {
   const after = Number(node.dataset.after);
-  const scale = Math.max(before, after, my, floor) || 1;
-  for (const [className, amount] of [['before', before], ['after', after], ['mine', my]]) {
-    const row = node.querySelector(`.yoy-row.${className}`);
-    if (!row) continue;
-    row.querySelector('i').style.width = `${(amount / scale) * 100}%`;
-    row.querySelector('.yoy-amount').textContent = won(amount);
-  }
   const diff = my - after;
-  // 내 예산 막대는 늘리면 빨강, 줄이면 파랑, 그대로면 검정이다(증감 색의 뜻과 같게).
-  const mineRow = node.querySelector('.yoy-row.mine');
   const changed = Math.round(diff / 100) !== 0;
-  mineRow.classList.toggle('up', changed && diff > 0);
-  mineRow.classList.toggle('down', changed && diff < 0);
-  const rate = after ? ` (${diff > 0 ? '+' : '−'}${Math.round((Math.abs(diff) / after) * 100)}%)` : '';
-  setChange(node.querySelector('.yoy-diff'), diff, Math.round(diff / 100) ? `정부안보다 ${signed(diff)}${rate}` : '');
+  const cell = node.querySelector('.yoy-cell.mine');
+  // 내 예산 칸은 늘리면 빨강, 줄이면 파랑, 그대로면 검정이다(증감 색의 뜻과 같게).
+  cell.classList.toggle('up', changed && diff > 0);
+  cell.classList.toggle('down', changed && diff < 0);
+  cell.querySelector('.yoy-amount').textContent = won(my);
+  const rate = after ? `${diff > 0 ? '+' : '−'}${Math.round((Math.abs(diff) / after) * 100)}%` : null;
+  setSub(cell.querySelector('.yoy-sub'), changed ? [rate, signed(diff)].filter(Boolean) : ['정부안과 같음']);
 }
 
 // 분야마다 다섯 단계 가운데 하나를 고른다. 라디오 버튼이라 키보드 화살표로도 고를 수 있다.
@@ -358,18 +356,16 @@ function renderPoints() {
       extra ?? null)));
 }
 
-// 세부사업마다 전년 → 정부안 금액과 증가액을 쓰고, 증가액이 전체 증가분에서 차지하는 만큼 빨간 막대로 그린다.
+// 세부사업마다 증가액과 전체 증가분에서 차지하는 비율, 전년 → 정부안 금액을 쓴다.
 function growthList(rows, totalGrowth) {
   return el('ol', { className: 'growth-list' }, ...rows.map((item) => {
     const before = item.amounts[prevYear()];
     const after = item.amounts[data.baseYear];
-    const fill = el('i');
-    fill.style.width = `${((after - before) / totalGrowth) * 100}%`;
     return el('li', {},
       el('span', { className: 'growth-name', textContent: item.detail || item.name }),
+      el('strong', { className: 'growth-diff', textContent: signed(after - before) }),
       el('span', { className: 'growth-amounts', textContent: `${won(before)} → ${won(after)}` }),
-      el('span', { className: 'growth-bar' }, fill),
-      el('strong', { className: 'growth-diff', textContent: signed(after - before) }));
+      el('span', { className: 'growth-share', textContent: `증가분의 ${Math.round(((after - before) / totalGrowth) * 100)}%` }));
   }));
 }
 

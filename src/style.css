@@ -616,7 +616,7 @@ a {
   font-size: 0.95rem;
 }
 
-/* 늘어난 돈 따라가기: 증가액이 큰 세부사업 */
+/* 늘어난 돈 따라가기: 증가액이 큰 세부사업. 사업명과 증가액, 그 아래 금액 변화와 증가분 비율 */
 .growth-list {
   grid-column: 2;
   margin: 10px 0 0;
@@ -628,38 +628,30 @@ a {
 
 .growth-list li {
   display: grid;
-  grid-template-columns: 1fr 7em; /* 막대 바탕 길이가 줄마다 같도록 증가액 칸 폭을 고정한다 */
+  grid-template-columns: 1fr auto;
   column-gap: 12px;
   padding: 6px 0;
   border-top: 1px solid var(--line);
 }
 
 .growth-name {
-  grid-column: 1 / -1;
   font-weight: 700;
-}
-
-.growth-amounts {
-  grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-.growth-bar {
-  align-self: center;
-  height: 6px;
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
-}
-
-.growth-bar i {
-  display: block;
-  height: 100%;
-  background: var(--up);
 }
 
 .growth-diff {
   color: var(--up);
   font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.growth-amounts,
+.growth-share {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.growth-share {
   text-align: right;
   white-space: nowrap;
 }
@@ -1021,137 +1013,93 @@ button:disabled {
   font-size: 0.9rem;
 }
 
-/* 전년 예산과 정부안 막대 비교. 막대 둘은 같은 축척이다. 넓은 화면에서도 휑하지 않게 폭을 묶는다. */
+/* 전년 예산·정부안·내 예산 세 칸. 칸 위 선: 2026년 회색, 정부안 검정, 내 예산은 늘리면 빨강·줄이면 파랑·그대로면 검정 */
 .yoy {
-  max-width: 420px;
-  margin: 8px 0 0;
-  font-size: 0.75rem;
-  color: var(--muted);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 480px;
+  margin: 10px 0 0;
   font-variant-numeric: tabular-nums;
 }
 
-.yoy-head {
+.yoy.only-mine {
+  grid-template-columns: 1fr;
+  max-width: 160px;
+}
+
+.yoy-cell {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
-  font-weight: 700;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 3px solid var(--line);
 }
 
-.yoy-chip {
-  padding: 0 6px;
-  background: var(--surface);
-  color: var(--fg);
-  font-weight: 600;
+.yoy-cell.after,
+.yoy-cell.mine {
+  border-top-color: var(--fg);
 }
 
-.yoy-chip strong {
-  font-weight: 900;
+.yoy-cell.mine.up {
+  border-top-color: var(--up);
 }
 
-.yoy-chip.up {
-  background: var(--up);
-  color: var(--bg);
+.yoy-cell.mine.down {
+  border-top-color: var(--down);
 }
 
-.yoy-chip.down {
-  background: var(--down);
-  color: var(--bg);
-}
-
-.yoy-row {
-  display: grid;
-  grid-template-columns: 7.5em 1fr 8.5em; /* 금액 칸은 크게 쓰는 내 예산(예: 7조 5,949억)까지 들어가게 */
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.yoy-bar {
-  height: 6px;
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
-}
-
-.yoy-bar i {
-  display: block;
-  height: 100%;
-  min-width: 2px;
-}
-
-.yoy-row.before .yoy-bar i {
-  background: var(--muted);
-  opacity: 0.6;
-}
-
-.yoy-row.after .yoy-bar i {
-  background: var(--fg);
-}
-
-.yoy-label,
-.yoy-amount {
+.yoy-label {
+  font-size: 0.75rem;
+  color: var(--muted);
   white-space: nowrap;
 }
 
 .yoy-amount {
-  text-align: right;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-/* 내 예산: 굵게 강조하고, 막대와 이름은 늘리면 빨강·줄이면 파랑 */
-.yoy-row.mine {
-  margin-top: 2px;
+.yoy-cell.before .yoy-amount {
+  color: var(--muted);
+  font-weight: 600;
 }
 
-.yoy-row.mine .yoy-label {
+.yoy-cell.mine .yoy-label {
   color: var(--fg);
+  font-weight: 800;
+}
+
+.yoy-cell.mine .yoy-amount {
+  font-size: 1.1rem;
   font-weight: 900;
 }
 
-.yoy-row.mine .yoy-bar {
-  height: 8px;
-}
-
-.yoy-row.mine .yoy-bar i {
-  background: var(--fg);
-}
-
-.yoy-row.mine.up .yoy-bar i {
-  background: var(--up);
-}
-
-.yoy-row.mine.down .yoy-bar i {
-  background: var(--down);
-}
-
-.yoy-row.mine.up .yoy-label {
+.yoy-cell.mine.up .yoy-amount,
+.yoy-cell.mine.up .yoy-sub {
   color: var(--up);
 }
 
-.yoy-row.mine.down .yoy-label {
+.yoy-cell.mine.down .yoy-amount,
+.yoy-cell.mine.down .yoy-sub {
   color: var(--down);
 }
 
-.yoy-row.mine .yoy-amount {
-  color: var(--fg);
-  font-size: 0.95rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-
-.yoy-diff {
-  margin: 0;
-  text-align: right;
+.yoy-sub {
+  font-size: 0.72rem;
   font-weight: 700;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
-.yoy-diff:empty {
+.yoy-sub span {
+  white-space: nowrap;
+}
+
+.yoy-sub:empty {
   display: none;
-}
-
-.yoy-row.after .yoy-label,
-.yoy-row.after .yoy-amount {
-  color: var(--fg);
-  font-weight: 800;
 }
 
 .change {
