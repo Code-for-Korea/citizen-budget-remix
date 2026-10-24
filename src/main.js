@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240335';
-import { setupBoard } from './board.js?v=202610240335';
-import { setupShare } from './share.js?v=202610240335';
+import { el } from './dom.js?v=202610240357';
+import { setupBoard } from './board.js?v=202610240357';
+import { setupShare } from './share.js?v=202610240357';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240335';
+} from './budget.js?v=202610240357';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -448,8 +448,23 @@ function render() {
   );
 }
 
+// '내 예산 공유': 지금 짠 예산이 담긴 주소를 나눈다. 휴대폰에서는 공유 시트를, 없으면 링크 복사를 쓴다.
+// (GNB의 '공유'는 사이트 주소를 나눈다. share.js)
 async function share() {
   const status = document.getElementById('share-status');
+  const summary = highlights().join(' · ');
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '모두의 AI 예산 심의 · 내 예산안',
+        text: `모두의 AI 예산 심의에서 내가 짠 AI 예산안${summary ? `: ${summary}` : ''}`,
+        url: location.href,
+      });
+    } catch {
+      // 공유 시트를 닫은 것도 여기로 온다.
+    }
+    return;
+  }
   try {
     await navigator.clipboard.writeText(location.href);
     status.textContent = '링크를 복사했습니다. 이 링크를 열면 내가 짠 예산이 그대로 보입니다.';
