@@ -558,6 +558,62 @@ a {
   color: var(--muted);
 }
 
+/* 짚어 볼 점: 빨간 펜으로 번호를 매긴 메모. 왼쪽에 번호, 큰 숫자 하나와 한 문장. */
+.points {
+  margin: 40px 0 16px;
+  counter-reset: point;
+}
+
+.points h2 {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 0 6px;
+  border: 3px solid var(--red);
+  color: var(--red);
+  font-size: 1.1rem;
+  transform: rotate(-2deg);
+}
+
+#points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.point {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  counter-increment: point;
+}
+
+.point::before {
+  content: counter(point, decimal-leading-zero);
+  grid-row: span 2;
+  color: var(--red);
+  font-size: 1.1rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.point-value {
+  font-size: 2.25rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline wavy var(--red) 2px;
+  text-underline-offset: 6px;
+}
+
+.point p {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+}
+
 /* 합계: 스크롤해도 위에 붙어 있는 검은 점수판 */
 .summary {
   position: sticky;

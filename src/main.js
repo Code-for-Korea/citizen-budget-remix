@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240316';
-import { setupBoard } from './board.js?v=202610240316';
-import { setupShare } from './share.js?v=202610240316';
+import { el } from './dom.js?v=202610240328';
+import { setupBoard } from './board.js?v=202610240328';
+import { setupShare } from './share.js?v=202610240328';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240316';
+} from './budget.js?v=202610240328';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -249,30 +249,50 @@ function categoryCard(category) {
   );
 }
 
-// 맨 위 핵심 숫자: 대분류마다 정부안에서 차지하는 비중(큰 것부터), 가장 큰 사업 하나의 비중, 정부안에 없는 칸.
+// 맨 위 핵심 숫자: 대분류마다 정부안에서 차지하는 비중. 금액이 큰 대분류부터 놓는다.
 function renderFacts() {
   const gov = sum(data.categories, base);
-  const items = data.categories.filter((c) => !isAmount(c)).flatMap((c) => c.items);
-  const top = items.reduce((a, b) => (b.amounts[data.baseYear] > a.amounts[data.baseYear] ? b : a));
-  const absent = data.categories.find(isAmount);
-
-  const facts = [
-    ...data.groups.filter((g) => !isAbsentGroup(g))
-      .map((group) => ({ group, amount: sum(members(group), base) }))
-      .sort((a, b) => b.amount - a.amount)
-      .map(({ group, amount }) => [`${percentOf(amount, gov)}%`, `${group.name} · ${won(amount)}`, group]),
-    [`${Math.round((top.amounts[data.baseYear] / gov) * 100)}%`,
-      `「${top.detail || top.name}」 사업 하나가 ${data.baseLabel} 전체에서 차지하는 비중`,
-      data.groups.find((g) => g.name === data.categories.find((c) => c.items.includes(top)).group)],
-    absent && ['0원', `정부 분류에 '${absent.name}' 칸이 없습니다`,
-      data.groups.find((g) => g.name === absent.group)],
-  ].filter(Boolean);
+  const facts = data.groups.filter((g) => !isAbsentGroup(g))
+    .map((group) => ({ group, amount: sum(members(group), base) }))
+    .sort((a, b) => b.amount - a.amount)
+    .map(({ group, amount }) => [`${percentOf(amount, gov)}%`, `${group.name} · ${won(amount)}`, group]);
 
   document.getElementById('facts').replaceChildren(...facts.map(([value, label, group]) => {
     const card = el('div', { className: 'fact' }, el('strong', { textContent: value }), el('span', { textContent: label }));
     card.style.setProperty('--fact-color', groupColor(group));
     return card;
   }));
+}
+
+// 짚어 볼 점: 숫자 카드로는 드러나지 않는 쏠림과 빈칸을 한 문장씩 짚는다. 모든 숫자는 데이터에서 계산한다.
+function renderPoints() {
+  const gov = sum(data.categories, base);
+  const before = sum(data.categories, prev);
+  const items = data.categories.filter((c) => !isAmount(c)).flatMap((c) => c.items);
+  const top = items.reduce((a, b) => (b.amounts[data.baseYear] > a.amounts[data.baseYear] ? b : a));
+  const groupAmount = (name) => sum(data.categories.filter((c) => c.group === name), base);
+  const biggest = data.groups.filter((g) => !isAbsentGroup(g)).reduce((a, b) => (groupAmount(b.name) > groupAmount(a.name) ? b : a));
+  const safety = groupAmount('안전·신뢰');
+  const shrunk = data.categories.filter((c) => !isAmount(c) && prev(c) > 0)
+    .reduce((a, b) => (base(b) / prev(b) < base(a) / prev(a) ? b : a));
+  const absent = data.categories.find(isAmount);
+  const related = absent ? absent.items.reduce((s, i) => s + i.amounts[data.baseYear], 0) : 0;
+
+  const points = [
+    [`${Math.round((top.amounts[data.baseYear] / gov) * 100)}%`,
+      `「${top.detail || top.name}」 사업 하나가 ${data.baseLabel} 전체(${won(gov)})의 ${Math.round((top.amounts[data.baseYear] / gov) * 100)}%, ${won(top.amounts[data.baseYear])}을 차지합니다.`],
+    safety && [`1 : ${Math.round(groupAmount(biggest.name) / safety)}`,
+      `안전·신뢰에 1원을 쓸 때 ${biggest.name}에는 약 ${Math.round(groupAmount(biggest.name) / safety)}원을 씁니다. 안전·신뢰는 ${won(safety)}, 전체의 ${percentOf(safety, gov)}%입니다.`],
+    base(shrunk) < prev(shrunk) && [`${Math.round(((base(shrunk) - prev(shrunk)) / prev(shrunk)) * 100)}%`.replace('-', '−'),
+      `전체 AI 예산이 ${prevYear()}년보다 ${Math.round(((gov - before) / before) * 100)}% 늘어나는 동안 「${shrunk.name}」 분야는 ${won(prev(shrunk))}에서 ${won(base(shrunk))}으로 가장 많이 줄었습니다.`],
+    absent && ['0원',
+      `정부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
+  ].filter(Boolean);
+
+  document.getElementById('points').replaceChildren(...points.map(([value, text]) =>
+    el('li', { className: 'point' },
+      el('strong', { className: 'point-value', textContent: value }),
+      el('p', { textContent: text }))));
 }
 
 // 분야별 칸 수. 칸 수 합계가 정부안 합계의 칸 수와 맞도록 나머지가 큰 분야부터 한 칸씩 더 준다.
@@ -386,6 +406,7 @@ function render() {
   renderTotals();
   renderWaffle();
   renderFacts();
+  renderPoints();
   renderLegend();
   renderBars();
 
