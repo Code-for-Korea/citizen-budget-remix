@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202611012202';
-import { setupBoard } from './board.js?v=202611012202';
-import { setupShare } from './share.js?v=202611012202';
+import { el } from './dom.js?v=202611012203';
+import { setupBoard } from './board.js?v=202611012203';
+import { setupShare } from './share.js?v=202611012203';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202611012202';
+} from './budget.js?v=202611012203';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -362,8 +362,7 @@ function renderPoints() {
     forAll && [won(base(forAll)),
       `전 국민이 AI 서비스를 쓸 수 있도록 지원하는 「${forAll.name}」(${forAll.items.map((i) => i.detail || i.name).join(', ')})에 `
       + `${won(base(forAll))}, 전체의 ${percentOf(base(forAll), gov)}%가 잡혔습니다. `
-      + (prev(forAll) ? `${prevYear()}년보다 ${signed(base(forAll) - prev(forAll))}입니다. ` : `${prevYear()}년에는 없던 칸입니다. `)
-      + (safety ? `안전·신뢰 분야 전체(${won(safety)})의 약 ${Math.round(base(forAll) / safety)}배입니다.` : '')],
+      + (prev(forAll) ? `${prevYear()}년보다 ${signed(base(forAll) - prev(forAll))}입니다.` : `${prevYear()}년에는 없던 칸입니다.`)],
     absent && ['0원',
       `과기정통부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
   ].filter(Boolean);
