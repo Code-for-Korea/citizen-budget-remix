@@ -1,13 +1,13 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202610240446';
-import { setupBoard } from './board.js?v=202610240446';
-import { setupShare } from './share.js?v=202610240446';
+import { el } from './dom.js?v=202611012202';
+import { setupBoard } from './board.js?v=202611012202';
+import { setupShare } from './share.js?v=202611012202';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202610240446';
+} from './budget.js?v=202611012202';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -345,6 +345,8 @@ function renderPoints() {
   const growthOf = (item) => item.amounts[data.baseYear] - item.amounts[prevYear()];
   const risers = [...items].sort((a, b) => growthOf(b) - growthOf(a)).slice(0, 3);
   const topGrowth = risers.reduce((s, item) => s + growthOf(item), 0);
+  // 전 국민이 쓰는 AI 서비스 지원. 정부안에 새로 생긴 칸이다.
+  const forAll = data.categories.find((c) => c.id === 'ai-for-all');
   const absent = data.categories.find(isAmount);
   const related = absent ? absent.items.reduce((s, i) => s + i.amounts[data.baseYear], 0) : 0;
 
@@ -357,6 +359,11 @@ function renderPoints() {
       `${prevYear()}년보다 늘어난 ${won(gov - before)} 가운데 ${Math.round((grownBy / (gov - before)) * 100)}%인 ${won(grownBy)}이 ${grown.name}에 들어갔습니다. `
       + `특히 아래 세 사업에만 ${won(topGrowth)}, 전체 증가분의 ${Math.round((topGrowth / (gov - before)) * 100)}%가 늘었습니다.`,
       growthList(risers, gov - before)],
+    forAll && [won(base(forAll)),
+      `전 국민이 AI 서비스를 쓸 수 있도록 지원하는 「${forAll.name}」(${forAll.items.map((i) => i.detail || i.name).join(', ')})에 `
+      + `${won(base(forAll))}, 전체의 ${percentOf(base(forAll), gov)}%가 잡혔습니다. `
+      + (prev(forAll) ? `${prevYear()}년보다 ${signed(base(forAll) - prev(forAll))}입니다. ` : `${prevYear()}년에는 없던 칸입니다. `)
+      + (safety ? `안전·신뢰 분야 전체(${won(safety)})의 약 ${Math.round(base(forAll) / safety)}배입니다.` : '')],
     absent && ['0원',
       `과기정통부 분류에는 「${absent.name}」처럼 민주주의와 공공재를 다루는 칸이 없습니다. 가까운 사업을 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
   ].filter(Boolean);
