@@ -22,5 +22,7 @@ Thumbs.db
 .vscode/
 *.swp
 
-# 테스트 스크린샷
+# 테스트 스크린샷(사이트가 쓰는 이미지는 예외)
 /*.png
+!/og.png
+!/apple-touch-icon.png
