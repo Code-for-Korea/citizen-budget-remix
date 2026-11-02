@@ -674,6 +674,36 @@ a {
   color: var(--muted);
 }
 
+.outside {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.outside li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.outside-owner {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.outside-name {
+  font-weight: 700;
+}
+
+.outside-amount {
+  white-space: nowrap;
+  text-align: right;
+}
+
 /* 합계: 스크롤해도 위에 붙어 있는 검은 점수판 */
 .summary {
   position: sticky;

@@ -154,6 +154,8 @@ def main(src, dest):
         "baseLabel": "2027년 정부안",
         "groups": [{"name": g, "description": descriptions["groups"].get(g, "")} for g in group_order],
         "source": descriptions["source"],
+        # 열린재정과 대조한 값(미래대응기금 편성액, 다른 부처의 AI 관련 사업). 사람이 descriptions.json에 적는다.
+        **({"crosscheck": descriptions["crosscheck"]} if "crosscheck" in descriptions else {}),
         "categories": ordered,
     }
     Path(dest).write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
