@@ -5,8 +5,8 @@
 // 페이지가 <html data-campaign="...">로 캠페인을 고른다. 없으면 AI 캠페인이다.
 // 주소는 bump_version.py가 버전 번호를 바꿀 수 있도록 따옴표 안에 그대로 적는다.
 const CAMPAIGNS = {
-  'ai-2027': new URL('../campaigns/ai-2027/budget.json?v=202611032332', import.meta.url),
-  'mcst-2027': new URL('../campaigns/mcst-2027/budget.json?v=202611032332', import.meta.url),
+  'ai-2027': new URL('../campaigns/ai-2027/budget.json?v=202611032334', import.meta.url),
+  'mcst-2027': new URL('../campaigns/mcst-2027/budget.json?v=202611032334', import.meta.url),
 };
 export const campaignId = document.documentElement.dataset.campaign || 'ai-2027';
 
