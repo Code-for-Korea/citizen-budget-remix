@@ -13,11 +13,11 @@
 // - [data-count="talk|budget"]: 글 수.
 // 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202611032340';
-import { el } from './dom.js?v=202611032340';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202611032354';
+import { el, closeButton } from './dom.js?v=202611032354';
 import {
   data, levels, levelOf, isAmount, base, won, signed, sum, budgetPairs, parseBudget, proposalText, summarize,
-} from './budget.js?v=202611032340';
+} from './budget.js?v=202611032354';
 
 const SESSION_KEY = 'board-session';
 const NAME_KEY = 'board-name';
@@ -203,12 +203,6 @@ function proposalSummary(post) {
 }
 
 // 모달 우상단의 닫기 버튼.
-function closeButton(dialog) {
-  const button = el('button', { type: 'button', className: 'dialog-close', textContent: '×', onclick: () => dialog.close() });
-  button.setAttribute('aria-label', '닫기');
-  return button;
-}
-
 // 글쓰기 창. 페이지마다 같은 모양이라 HTML에 두지 않고 여기서 만든다.
 function formDialog() {
   const field = (label, control, className = '') => el('label', { className }, label, ' ', control);

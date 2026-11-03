@@ -3,10 +3,19 @@
 // 조절 값은 "c=id:값,..." 문자열로 주소의 해시와 시민 예산안에 담는다. 값은 퍼센트, 금액 칸은 억 원 단위다.
 
 // 페이지가 <html data-campaign="...">로 캠페인을 고른다. 없으면 AI 캠페인이다.
-// 주소는 bump_version.py가 버전 번호를 바꿀 수 있도록 따옴표 안에 그대로 적는다.
-const CAMPAIGNS = {
-  'ai-2027': new URL('../campaigns/ai-2027/budget.json?v=202611032340', import.meta.url),
-  'mcst-2027': new URL('../campaigns/mcst-2027/budget.json?v=202611032340', import.meta.url),
+// name은 화면에 쓰는 부처 예산 이름, home은 그 캠페인의 홈 주소다(부처 바꾸기, switch.js).
+// 데이터 주소는 bump_version.py가 버전 번호를 바꿀 수 있도록 따옴표 안에 그대로 적는다.
+export const CAMPAIGNS = {
+  'ai-2027': {
+    name: '과학기술정보통신부 AI 예산',
+    data: new URL('../campaigns/ai-2027/budget.json?v=202611032354', import.meta.url),
+    home: new URL('../', import.meta.url),
+  },
+  'mcst-2027': {
+    name: '문화체육관광부 예산',
+    data: new URL('../campaigns/mcst-2027/budget.json?v=202611032354', import.meta.url),
+    home: new URL('../mcst/', import.meta.url),
+  },
 };
 export const campaignId = document.documentElement.dataset.campaign || 'ai-2027';
 
@@ -31,7 +40,7 @@ export let data;
 // 대분류는 정부안 금액이 큰 것부터 놓는다. 정부안에 없는 칸(0원)은 맨 끝에 온다.
 export async function loadCampaign() {
   if (!CAMPAIGNS[campaignId]) throw new Error(`알 수 없는 캠페인: ${campaignId}`);
-  data = await (await fetch(CAMPAIGNS[campaignId])).json();
+  data = await (await fetch(CAMPAIGNS[campaignId].data)).json();
   const amount = (group) => data.categories.filter((c) => c.group === group.name)
     .reduce((s, c) => s + c.amounts[data.baseYear], 0);
   data.groups.sort((a, b) => amount(b) - amount(a));

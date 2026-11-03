@@ -91,7 +91,7 @@ python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 
 ### 다른 캠페인 붙이기 (문체부 테스트)
 
-페이지의 `<html data-campaign="mcst-2027">`이 읽을 캠페인을 정합니다(없으면 `ai-2027`). 캠페인 주소는 `src/budget.js`의 `CAMPAIGNS`에 적습니다. 같은 `<html>`의 `data-scope`·`data-ministry`·`data-share-text`가 화면 문구와 공유 문장을 캠페인에 맞춥니다. 게시판 글은 캠페인 id(`posts.campaign`)로 나뉘어 다른 캠페인 화면에는 보이지 않고, 기억해 둔 내 예산도 캠페인마다 따로 둡니다.
+페이지의 `<html data-campaign="mcst-2027">`이 읽을 캠페인을 정합니다(없으면 `ai-2027`). 캠페인의 이름(「문화체육관광부 예산」)·데이터·홈 주소는 `src/budget.js`의 `CAMPAIGNS`에 적습니다. 같은 `<html>`의 `data-ministry`·`data-share-text`가 화면 문구와 공유 문장을 캠페인에 맞춥니다. `<html data-campaign-switch>`가 있는 페이지는 부처 이름을 눌러 다른 부처 예산으로 옮겨 갈 수 있습니다(`src/switch.js`). 지금은 공개 전인 문화체육관광부 페이지에만 켜 두었고, 공개할 때 AI 사이트 세 페이지에도 이 속성과 부처 이름 자리(`data-scope-switch`)를 더합니다. 게시판 글은 캠페인 id(`posts.campaign`)로 나뉘어 다른 캠페인 화면에는 보이지 않고, 기억해 둔 내 예산도 캠페인마다 따로 둡니다.
 
 `/mcst/`는 문화체육관광부 2027년 예산 정부안을 붙인 공개 전 테스트 버전입니다. `noindex`를 달았고 사이트 어디에서도 링크하지 않습니다. 데이터(`campaigns/mcst-2027/`)는 변환 스크립트가 아니라 문체부 사업설명자료에서 따로 뽑아 넣은 것이라, 고칠 때는 `budget.json`과 `descriptions.json`을 함께 고칩니다. 자세한 기준은 그 폴더의 README에 있습니다.
 

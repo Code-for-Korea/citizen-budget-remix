@@ -1,20 +1,21 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202611032340';
-import { setupBoard } from './board.js?v=202611032340';
-import { setupShare } from './share.js?v=202611032340';
+import { el } from './dom.js?v=202611032354';
+import { setupBoard } from './board.js?v=202611032354';
+import { setupShare } from './share.js?v=202611032354';
+import { setupSwitch } from './switch.js?v=202611032354';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
-  parseBudget, budgetPairs, SAVED_KEY, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202611032340';
+  parseBudget, budgetPairs, SAVED_KEY, CAMPAIGNS, campaignId, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
+} from './budget.js?v=202611032354';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
 // 다른 페이지에서 제안을 내 예산안에 반영할 때 이어 붙일 수 있도록 마지막 예산을 SAVED_KEY에 기억한다(posts.js).
 
-// 캠페인마다 다른 문구: 페이지의 <html data-scope="과학기술정보통신부 AI 예산" data-ministry="과학기술정보통신부">.
-const SCOPE = document.documentElement.dataset.scope || '과학기술정보통신부 AI 예산';
+// 캠페인마다 다른 문구: 부처 예산 이름은 budget.js의 CAMPAIGNS, 부처 이름은 페이지의 <html data-ministry>.
+const SCOPE = CAMPAIGNS[campaignId].name;
 const MINISTRY = document.documentElement.dataset.ministry || '과학기술정보통신부';
 const SITE_TITLE = document.querySelector('meta[property="og:site_name"]')?.content || document.title;
 
@@ -601,6 +602,7 @@ async function start() {
   render();
   update();
   setupTooltip();
+  setupSwitch();
   const summary = document.getElementById('summary');
   new ResizeObserver(() => {
     document.documentElement.style.setProperty('--summary-height', `${summary.offsetHeight}px`);
