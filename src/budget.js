@@ -2,7 +2,16 @@
 // 정부 분류의 칸은 정부안 대비 다섯 단계 중 하나를, 정부안에 없는 칸(input: 'amount')은 금액 다섯 단계 중 하나를 고른다.
 // 조절 값은 "c=id:값,..." 문자열로 주소의 해시와 시민 예산안에 담는다. 값은 퍼센트, 금액 칸은 억 원 단위다.
 
-const CAMPAIGN = new URL('../campaigns/ai-2027/budget.json?v=202611032327', import.meta.url);
+// 페이지가 <html data-campaign="...">로 캠페인을 고른다. 없으면 AI 캠페인이다.
+// 주소는 bump_version.py가 버전 번호를 바꿀 수 있도록 따옴표 안에 그대로 적는다.
+const CAMPAIGNS = {
+  'ai-2027': new URL('../campaigns/ai-2027/budget.json?v=202611032332', import.meta.url),
+  'mcst-2027': new URL('../campaigns/mcst-2027/budget.json?v=202611032332', import.meta.url),
+};
+export const campaignId = document.documentElement.dataset.campaign || 'ai-2027';
+
+// 홈이 기억해 두는 마지막 예산(main.js, posts.js). 캠페인마다 따로 둔다. AI 캠페인은 예전 키를 그대로 쓴다.
+export const SAVED_KEY = campaignId === 'ai-2027' ? 'my-budget' : `my-budget:${campaignId}`;
 
 // 국회 심의처럼 늘릴지 줄일지와 그 폭만 고른다. tone은 화면의 색(style.css의 .level.up/.down: 늘림은 빨강, 줄임은 파랑),
 // arrow는 색을 보지 않아도 방향을 알 수 있게 붙이는 표시다.
@@ -21,7 +30,8 @@ export let data;
 
 // 대분류는 정부안 금액이 큰 것부터 놓는다. 정부안에 없는 칸(0원)은 맨 끝에 온다.
 export async function loadCampaign() {
-  data = await (await fetch(CAMPAIGN)).json();
+  if (!CAMPAIGNS[campaignId]) throw new Error(`알 수 없는 캠페인: ${campaignId}`);
+  data = await (await fetch(CAMPAIGNS[campaignId])).json();
   const amount = (group) => data.categories.filter((c) => c.group === group.name)
     .reduce((s, c) => s + c.amounts[data.baseYear], 0);
   data.groups.sort((a, b) => amount(b) - amount(a));

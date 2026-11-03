@@ -1,18 +1,22 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202611032327';
-import { setupBoard } from './board.js?v=202611032327';
-import { setupShare } from './share.js?v=202611032327';
+import { el } from './dom.js?v=202611032332';
+import { setupBoard } from './board.js?v=202611032332';
+import { setupShare } from './share.js?v=202611032332';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
-  parseBudget, budgetPairs, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202611032327';
+  parseBudget, budgetPairs, SAVED_KEY, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
+} from './budget.js?v=202611032332';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
-// 다른 페이지에서 제안을 내 예산안에 반영할 때 이어 붙일 수 있도록 마지막 예산을 기억한다(posts.js).
-const SAVED_KEY = 'my-budget';
+// 다른 페이지에서 제안을 내 예산안에 반영할 때 이어 붙일 수 있도록 마지막 예산을 SAVED_KEY에 기억한다(posts.js).
+
+// 캠페인마다 다른 문구: 페이지의 <html data-scope="과기정통부 AI 예산" data-ministry="과기정통부">.
+const SCOPE = document.documentElement.dataset.scope || '과기정통부 AI 예산';
+const MINISTRY = document.documentElement.dataset.ministry || '과기정통부';
+const SITE_TITLE = document.querySelector('meta[property="og:site_name"]')?.content || document.title;
 
 const values = new Map();
 // 사용자가 단계를 직접 고른 분야. 처음에는 비어 있어 어느 버튼도 눌려 있지 않다.
@@ -357,7 +361,7 @@ function renderPoints() {
     [`${Math.round((top.amounts[data.baseYear] / gov) * 100)}%`,
       `「${top.detail || top.name}」 사업 하나가 ${data.baseLabel} 전체(${won(gov)})의 ${Math.round((top.amounts[data.baseYear] / gov) * 100)}%, ${won(top.amounts[data.baseYear])}을 차지합니다.`],
     fund && [`${Math.round((fund.amount / gov) * 100)}%`,
-      `이 사이트가 다루는 과기정통부 AI 예산 ${won(gov)} 가운데 ${won(fund.amount)}(${percentOf(fund.amount, gov)}%)은 과기정통부가 아니라 `
+      `이 사이트가 다루는 ${SCOPE} ${won(gov)} 가운데 ${won(fund.amount)}(${percentOf(fund.amount, gov)}%)은 ${MINISTRY}가 아니라 `
       + `${fund.owner} 소관 「${fund.name}」으로 편성되어 있습니다. ${data.crosscheck.source}에서 확인했습니다.`],
     safety && [`1 : ${Math.round(groupAmount(biggest.name) / safety)}`,
       `안전·신뢰에 1원을 쓸 때 ${biggest.name}에는 약 ${Math.round(groupAmount(biggest.name) / safety)}원을 씁니다. 안전·신뢰는 ${won(safety)}, 전체의 ${percentOf(safety, gov)}%입니다.`],
@@ -397,9 +401,10 @@ function growthList(rows, totalGrowth) {
 // 이 사이트가 다루지 않는 예산: 열린재정에서 세부사업 이름으로 확인한 다른 곳의 AI 관련 사업(campaign의 crosscheck).
 function renderOutside() {
   const cross = data.crosscheck;
-  if (!cross) return;
+  const list = document.getElementById('outside');
+  if (!cross || !list) return;
   document.getElementById('outside-source').textContent = cross.source;
-  document.getElementById('outside').replaceChildren(...cross.outside.map((item) =>
+  list.replaceChildren(...cross.outside.map((item) =>
     el('li', {},
       el('span', { className: 'outside-owner', textContent: item.owner }),
       el('span', { className: 'outside-name', textContent: item.note ? `${item.name}(${item.note})` : item.name }),
@@ -450,7 +455,8 @@ function renderWaffle() {
   const absent = data.categories.find(isAmount);
   document.getElementById('waffle-caption').replaceChildren(
     el('strong', { textContent: `정부안 ${won(gov)} 원을 100억 원짜리 칸 ${total.toLocaleString('ko-KR')}개로 나눠 보면` }),
-    absent ? el('span', { textContent: `맨 끝 점선 칸은 과기정통부 예산에서 따로 확인하기 어려운 '${absent.name}'로, 시민이 채우는 칸입니다. 칸에 손가락이나 마우스를 올려 보세요.` }) : null,
+    // replaceChildren은 null을 "null" 글자로 넣으므로, 정부안에 없는 칸이 없는 캠페인도 늘 문장 하나를 넣는다.
+    el('span', { textContent: `${absent ? `맨 끝 점선 칸은 ${MINISTRY} 예산에서 따로 확인하기 어려운 '${absent.name}'로, 시민이 채우는 칸입니다. ` : ''}칸에 손가락이나 마우스를 올려 보세요.` }),
   );
 }
 
@@ -558,8 +564,8 @@ async function share() {
   if (navigator.share) {
     try {
       await navigator.share({
-        title: '모두의 AI 예산 심의 · 내 예산안',
-        text: `모두의 AI 예산 심의에서 내가 짠 AI 예산안${summary ? `: ${summary}` : ''}`,
+        title: `${SITE_TITLE} · 내 예산안`,
+        text: `${SITE_TITLE}에서 내가 짠 예산안${summary ? `: ${summary}` : ''}`,
         url: location.href,
       });
     } catch {

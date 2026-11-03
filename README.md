@@ -73,6 +73,8 @@ src/style.css                   스타일
 supabase/migrations/            게시판 DB 스키마와 권한 규칙(SQL)
 campaigns/ai-2027/budget.json   2027년 AI 예산 데이터 (변환 스크립트가 만든다)
 campaigns/ai-2027/descriptions.json  출처·분류 설명 (사람이 쓴다)
+campaigns/mcst-2027/             문체부 2027년 예산 데이터 (공개 전 테스트, /mcst/에서 씀)
+mcst/                           문체부 예산 테스트 페이지 세 개 (검색 제외, 사이트에서 링크하지 않음)
 scripts/xlsx_to_json.py         원자료 엑셀을 budget.json으로 변환
 scripts/bump_version.py         배포 전에 CSS·JS·JSON 주소의 버전 번호(?v=)를 한꺼번에 바꿈
 ```
@@ -86,6 +88,12 @@ python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 ```
 
 금액은 열린재정의 「세부사업 예산편성현황(총지출)」(2027년 정부안, 합계 820.9조 원)과 대조했습니다. 대조로 알아낸 값(미래대응기금으로 편성된 금액, 다른 곳의 AI 관련 사업)은 `descriptions.json`의 `crosscheck`에 사람이 적고, 변환 스크립트가 `budget.json`으로 그대로 옮깁니다. 열린재정 파일은 저장소에 넣지 않습니다.
+
+### 다른 캠페인 붙이기 (문체부 테스트)
+
+페이지의 `<html data-campaign="mcst-2027">`이 읽을 캠페인을 정합니다(없으면 `ai-2027`). 캠페인 주소는 `src/budget.js`의 `CAMPAIGNS`에 적습니다. 같은 `<html>`의 `data-scope`·`data-ministry`·`data-share-text`가 화면 문구와 공유 문장을 캠페인에 맞춥니다. 게시판 글은 캠페인 id(`posts.campaign`)로 나뉘어 다른 캠페인 화면에는 보이지 않고, 기억해 둔 내 예산도 캠페인마다 따로 둡니다.
+
+`/mcst/`는 문화체육관광부 2027년 예산 정부안을 붙인 공개 전 테스트 버전입니다. `noindex`를 달았고 사이트 어디에서도 링크하지 않습니다. 데이터(`campaigns/mcst-2027/`)는 변환 스크립트가 아니라 문체부 사업설명자료에서 따로 뽑아 넣은 것이라, 고칠 때는 `budget.json`과 `descriptions.json`을 함께 고칩니다. 자세한 기준은 그 폴더의 README에 있습니다.
 
 ## 게시판 설정 (Supabase)
 

@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FILES = [ROOT / "index.html", *ROOT.glob("*/index.html"), *(ROOT / "src").glob("*.js")]
+FILES = [ROOT / "index.html", *ROOT.glob("*/index.html"), *ROOT.glob("*/*/index.html"), *(ROOT / "src").glob("*.js")]
 # 따옴표 안의 상대 주소 가운데 .css, .js, .json으로 끝나는 것. 주석 속 파일 이름은 따옴표가 없어서 건드리지 않는다.
 REFERENCE = re.compile(r"""(["'])((?:\.{1,2}/|src/)[^"'?:]*\.(?:css|js|json))(?:\?v=([\w-]*))?\1""")
 

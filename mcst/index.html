@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko" data-campaign="mcst-2027" data-scope="문체부 예산" data-ministry="문체부" data-share-text="국회가 심의하는 문화·관광·체육 예산, 시민도 직접 나눠 보고 따져 봅니다.">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- 공개 전 테스트 버전: 검색에 올리지 않고, 사이트 어디에서도 이 주소로 링크하지 않는다. -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>문체부 예산 심의 (테스트)</title>
+  <meta name="description" content="국회가 심의하는 문화·관광·체육 예산, 시민도 직접 나눠 보고 따져 봅니다.">
+  <meta property="og:site_name" content="문체부 예산 심의">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0e0e" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="../src/style.css?v=202611032332">
+</head>
+<body>
+  <header class="gnb">
+    <a class="gnb-brand" href="./">문체부 예산 <span>심의</span></a>
+    <nav class="gnb-menu" aria-label="사이트 메뉴">
+      <a href="./" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg><span>예산안 짜기</span></a>
+      <a href="./budgets/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg><span>시민 예산안</span></a>
+      <a href="./deliberation/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><span>시민 심의</span></a>
+    </nav>
+    <button type="button" class="gnb-share" data-share-site><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/></svg><span>공유</span></button>
+  </header>
+
+  <header class="intro">
+    <p class="eyebrow">테스트 버전 · 공개 전 · 2027년 정부안</p>
+    <h1>문체부 예산 <span class="stamp">심의</span></h1>
+    <p class="tagline">국회가 심의하는 문화·관광·체육 예산, 시민도 직접 나눠 보고 따져 봅니다.</p>
+    <p>문화체육관광부의 2027년 예산 정부안을 문체부 예산의 프로그램 단위로 나눴습니다. 금액을 내 생각대로 조절해 보고, 내가 짠 예산은 링크로 나눌 수 있습니다.</p>
+    <p class="test-note">공개 전 테스트 버전입니다. 숫자와 설명을 아직 검토하고 있고, 여기서 남긴 글은 공개 사이트(AI 예산)에는 보이지 않습니다.</p>
+
+    <figure class="waffle-figure">
+      <figcaption id="waffle-caption"></figcaption>
+      <div class="waffle" id="waffle" role="img"></div>
+      <ul class="legend" id="legend" aria-label="분야별 색과 칸 수"></ul>
+    </figure>
+
+    <div class="hero-actions">
+      <a class="start" href="#summary">내 예산 짜러 가기 ↓</a>
+      <a class="start secondary" href="#board">시민 예산안·심의 보기</a>
+    </div>
+    <div class="facts" id="facts"></div>
+    <section class="points" aria-labelledby="points-title">
+      <h2 id="points-title">짚어 볼 점</h2>
+      <ol id="points"></ol>
+    </section>
+  </header>
+
+  <section class="summary" id="summary" aria-label="합계">
+    <dl>
+      <div><dt id="total-prev-label">전년 예산</dt><dd id="total-prev">-</dd></div>
+      <div><dt id="total-gov-label">정부안</dt><dd><span id="total-gov">-</span> <small class="change" id="total-growth"></small></dd></div>
+      <div><dt>내 예산</dt><dd><span id="total-mine">-</span> <small class="change" id="total-diff"></small></dd></div>
+    </dl>
+    <div class="bars" aria-hidden="true">
+      <div class="bar-row"><span class="bar-label">정부안</span><div class="track"><div class="fill" id="bar-gov"></div></div></div>
+      <div class="bar-row"><span class="bar-label">내 예산</span><div class="track"><div class="fill" id="bar-mine"></div></div></div>
+    </div>
+    <p class="highlights" id="highlights"></p>
+    <div class="actions">
+      <button type="button" id="share">내 예산 공유</button>
+      <button type="button" class="secondary" data-write="budget">시민 예산안 내기</button>
+      <button type="button" id="reset" class="secondary"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg>다시 시작</button>
+    </div>
+    <p class="share-status" id="share-status" role="status"></p>
+  </section>
+
+  <main id="groups">
+    <p class="status">예산 항목을 불러오고 있습니다.</p>
+  </main>
+
+  <section class="board" id="board" aria-labelledby="board-title">
+    <h2 id="board-title">시민 심의 게시판</h2>
+    <p class="board-intro">위에서 짠 내 예산을 시민 예산안으로 내고, 다른 사람의 예산안을 불러와 고쳐 보세요. 예산안 전체나 대분류·분야마다 질문·제안도 남길 수 있습니다. 제안은 대분류나 분야 하나를 얼마나 늘리거나 줄이자는 글입니다.</p>
+
+    <section class="board-list" data-board-list data-kind="budget" data-limit="5" aria-labelledby="recent-budgets">
+      <div class="board-bar">
+        <h3 id="recent-budgets">최근 시민 예산안 <span class="count" data-count="budget"></span></h3>
+        <div class="board-actions">
+          <a href="budgets/">전체 보기</a>
+          <button type="button" data-write="budget">시민 예산안 내기</button>
+        </div>
+      </div>
+      <p class="status board-status" role="status"></p>
+      <ol class="posts"></ol>
+    </section>
+
+    <section class="board-list" data-board-list data-kind="talk" data-limit="5" aria-labelledby="recent-talk">
+      <div class="board-bar">
+        <h3 id="recent-talk">최근 질문·제안 <span class="count" data-count="talk"></span></h3>
+        <div class="board-actions">
+          <a href="deliberation/">전체 보기</a>
+          <button type="button" data-write="" data-target="">남기기</button>
+        </div>
+      </div>
+      <p class="status board-status" role="status"></p>
+      <ol class="posts"></ol>
+    </section>
+  </section>
+
+  <footer id="source"></footer>
+
+  <div class="tip" id="tip" role="tooltip" hidden></div>
+
+  <footer class="site-footer">
+    <p>코드포코리아 디스코드에서 함께 이야기해요. <a href="https://discord.gg/xNNvfhJUV5" target="_blank" rel="noopener">디스코드 참여하기 →</a></p>
+    <p>만든 사람: 권오현 · <a href="https://github.com/Code-for-Korea/citizen-budget-remix" target="_blank" rel="noopener">GitHub 저장소</a></p>
+  </footer>
+
+  <script type="module" src="../src/main.js?v=202611032332"></script>
+</body>
+</html>

@@ -1,11 +1,13 @@
 // GNB의 '공유' 버튼: 사이트 주소를 나눈다. 휴대폰에서는 운영체제 공유 시트를 열고,
 // 공유 시트가 없으면 링크를 복사한 뒤 잠깐 알림을 띄운다. 모든 페이지(main.js, posts.js)가 부른다.
 
-import { el } from './dom.js?v=202611032327';
+import { el } from './dom.js?v=202611032332';
 
-const SITE = new URL('../', import.meta.url).href;
-const TITLE = '모두의 AI 예산 심의';
-const TEXT = '국회가 심의하는 AI 예산, 시민도 직접 나눠 보고 따져 봅니다.';
+// 사이트 주소는 GNB의 이름 링크(그 사이트의 홈), 이름은 og:site_name, 소개 문장은 <html data-share-text>를 따른다.
+// 그래서 /mcst/ 같은 다른 캠페인 페이지에서는 그 캠페인의 홈을 나눈다.
+const SITE = document.querySelector('.gnb-brand')?.href || new URL('../', import.meta.url).href;
+const TITLE = document.querySelector('meta[property="og:site_name"]')?.content || document.title;
+const TEXT = document.documentElement.dataset.shareText || '국회가 심의하는 AI 예산, 시민도 직접 나눠 보고 따져 봅니다.';
 
 function toast(message) {
   const node = el('div', { className: 'toast', role: 'status', textContent: message });

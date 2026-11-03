@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko" data-campaign="mcst-2027" data-scope="문체부 예산" data-ministry="문체부" data-share-text="국회가 심의하는 문화·관광·체육 예산, 시민도 직접 나눠 보고 따져 봅니다.">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- 공개 전 테스트 버전: 검색에 올리지 않고, 사이트 어디에서도 이 주소로 링크하지 않는다. -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>시민 심의 · 문체부 예산 심의 (테스트)</title>
+  <meta name="description" content="국회가 심의하는 문화·관광·체육 예산, 시민도 직접 나눠 보고 따져 봅니다.">
+  <meta property="og:site_name" content="문체부 예산 심의">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0e0e" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="../../src/style.css?v=202611032332">
+</head>
+<body>
+  <header class="gnb">
+    <a class="gnb-brand" href="../">문체부 예산 <span>심의</span></a>
+    <nav class="gnb-menu" aria-label="사이트 메뉴">
+      <a href="../"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg><span>예산안 짜기</span></a>
+      <a href="../budgets/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg><span>시민 예산안</span></a>
+      <a href="../deliberation/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><span>시민 심의</span></a>
+    </nav>
+    <button type="button" class="gnb-share" data-share-site><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/></svg><span>공유</span></button>
+  </header>
+
+  <main class="board page">
+    <h1>시민 심의 <span class="count" data-count="talk"></span></h1>
+    <p class="board-intro">예산안 전체, 대분류, 분야마다 시민이 남긴 질문·제안입니다. 제안은 대분류나 분야 하나를 얼마나 늘리거나 줄이자는 글이고, 「내 예산안에 반영」을 누르면 홈에서 내 예산에 그대로 옮겨집니다.</p>
+
+    <section class="board-list" data-board-list data-kind="talk" aria-label="질문·제안 목록">
+      <div class="board-bar">
+        <div class="filters">
+          <label class="filter">종류 <select data-kind-filter>
+            <option value="all">모두</option>
+            <option value="question">질문</option>
+            <option value="proposal">제안</option>
+          </select></label>
+          <label class="filter">대상 <select data-filter><option value="all">모든 대상</option></select></label>
+        </div>
+        <button type="button" data-write="" data-target="">남기기</button>
+      </div>
+      <p class="status board-status" role="status"></p>
+      <ol class="posts"></ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>코드포코리아 디스코드에서 함께 이야기해요. <a href="https://discord.gg/xNNvfhJUV5" target="_blank" rel="noopener">디스코드 참여하기 →</a></p>
+    <p>만든 사람: 권오현 · <a href="https://github.com/Code-for-Korea/citizen-budget-remix" target="_blank" rel="noopener">GitHub 저장소</a></p>
+  </footer>
+
+  <script type="module" src="../../src/posts.js?v=202611032332"></script>
+</body>
+</html>
