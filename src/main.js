@@ -1,21 +1,21 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202611032336';
-import { setupBoard } from './board.js?v=202611032336';
-import { setupShare } from './share.js?v=202611032336';
+import { el } from './dom.js?v=202611032340';
+import { setupBoard } from './board.js?v=202611032340';
+import { setupShare } from './share.js?v=202611032340';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, SAVED_KEY, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202611032336';
+} from './budget.js?v=202611032340';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
 // 다른 페이지에서 제안을 내 예산안에 반영할 때 이어 붙일 수 있도록 마지막 예산을 SAVED_KEY에 기억한다(posts.js).
 
-// 캠페인마다 다른 문구: 페이지의 <html data-scope="과기정통부 AI 예산" data-ministry="과기정통부">.
-const SCOPE = document.documentElement.dataset.scope || '과기정통부 AI 예산';
-const MINISTRY = document.documentElement.dataset.ministry || '과기정통부';
+// 캠페인마다 다른 문구: 페이지의 <html data-scope="과학기술정보통신부 AI 예산" data-ministry="과학기술정보통신부">.
+const SCOPE = document.documentElement.dataset.scope || '과학기술정보통신부 AI 예산';
+const MINISTRY = document.documentElement.dataset.ministry || '과학기술정보통신부';
 const SITE_TITLE = document.querySelector('meta[property="og:site_name"]')?.content || document.title;
 
 const values = new Map();
@@ -374,7 +374,7 @@ function renderPoints() {
       + `${won(base(forAll))}, 전체의 ${percentOf(base(forAll), gov)}%가 잡혔습니다. `
       + (prev(forAll) ? `${prevYear()}년보다 ${signed(base(forAll) - prev(forAll))}입니다.` : `${prevYear()}년에는 없던 칸입니다.`)],
     absent && [`${percentOf(related, gov)}%`,
-      `과기정통부 예산에서는 「${absent.name}」처럼 민주주의와 공공재에 쓰는 예산을 따로 확인하기 어렵습니다. `
+      `과학기술정보통신부 예산에서는 「${absent.name}」처럼 민주주의와 공공재에 쓰는 예산을 따로 확인하기 어렵습니다. `
       + `이름으로 찾은 가까운 사업 ${absent.items.length}개를 모두 더해도 ${won(related)}, 전체의 ${percentOf(related, gov)}%입니다.`],
   ].filter(Boolean);
 
