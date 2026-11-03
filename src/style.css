@@ -718,6 +718,12 @@ a {
   --down: var(--board-down);
 }
 
+.summary-scope {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
 .summary dl {
   display: grid;
   grid-template-columns: repeat(3, auto);
