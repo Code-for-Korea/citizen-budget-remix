@@ -13,11 +13,11 @@
 // - [data-count="talk|budget"]: 글 수.
 // 대상은 posts.category_id에 담는다. 빈 값은 예산안 전체, 'group:이름'은 대분류, 그 밖은 분야 id다.
 
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202611021036';
-import { el } from './dom.js?v=202611021036';
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js?v=202611032327';
+import { el } from './dom.js?v=202611032327';
 import {
   data, levels, levelOf, isAmount, base, won, signed, sum, budgetPairs, parseBudget, proposalText, summarize,
-} from './budget.js?v=202611021036';
+} from './budget.js?v=202611032327';
 
 const SESSION_KEY = 'board-session';
 const NAME_KEY = 'board-name';
@@ -85,10 +85,29 @@ async function call(url, { method = 'GET', body, token, prefer } = {}) {
     throw new RequestError('게시판 서버에 연결하지 못했습니다. 인터넷 연결을 확인해 주세요.');
   }
   const json = response.status === 204 ? null : await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new RequestError(json?.message || json?.msg || `요청이 실패했습니다(${response.status}).`, response.status);
-  }
+  if (!response.ok) throw new RequestError(explain(response.status, json), response.status);
   return json;
+}
+
+// 서버(Supabase 인증·PostgREST)의 영어 오류를 시민이 읽을 한국어 안내로 바꾼다.
+// 운영자가 원인을 찾을 수 있게 서버가 준 오류 코드를 괄호에 함께 적는다.
+function explain(status, json) {
+  const code = json?.error_code || json?.code || '';
+  const message = (() => {
+    if (['anonymous_provider_disabled', 'signup_disabled'].includes(code)) {
+      return '지금은 게시판 설정 문제로 글을 올릴 수 없습니다. 사이트 맨 아래의 디스코드로 알려 주시면 고치겠습니다.';
+    }
+    if (status === 429 || code.startsWith('over_')) return '요청이 너무 잦습니다. 잠시 뒤 다시 시도해 주세요.';
+    if (status === 401 || code === '42501' || code.startsWith('PGRST30')) {
+      return '글을 올릴 권한을 확인하지 못했습니다. 페이지를 새로 고친 뒤 다시 시도해 주세요.';
+    }
+    if (['23502', '23514', '22001'].includes(code)) {
+      return '입력한 내용을 저장하지 못했습니다. 제목은 100자, 내용은 4,000자, 이름은 30자 안으로 적어 주세요.';
+    }
+    if (status >= 500) return '게시판 서버에 문제가 생겼습니다. 잠시 뒤 다시 시도해 주세요.';
+    return '요청을 처리하지 못했습니다. 잠시 뒤 다시 시도해 주세요.';
+  })();
+  return `${message} (오류 ${status}${code ? ` ${code}` : ''})`;
 }
 
 async function auth(path, body) {
