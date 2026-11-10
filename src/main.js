@@ -1,14 +1,15 @@
 // 홈 화면: 캠페인 데이터를 불러와 분야(중분류)마다 증액·감액을 고르는 화면을 그린다.
 // 고른 값은 주소의 해시(#c=id:값,...)에 담아 공유한다. 값을 읽고 쓰는 규칙은 budget.js에 있다.
 
-import { el } from './dom.js?v=202611100133';
-import { setupBoard } from './board.js?v=202611100133';
-import { setupShare } from './share.js?v=202611100133';
-import { setupSwitch } from './switch.js?v=202611100133';
+import { el } from './dom.js?v=202611100208';
+import { setupBoard } from './board.js?v=202611100208';
+import { setupShare } from './share.js?v=202611100208';
+import { setupSwitch } from './switch.js?v=202611100208';
+import { setupClicks } from './clicks.js?v=202611100208';
 import {
   data, loadCampaign, won, signed, growth, isAmount, levels, initial, base, prevYear, prev, sum,
   parseBudget, budgetPairs, SAVED_KEY, CAMPAIGNS, campaignId, mine as budgetMine, budgetText as budgetString, highlights as budgetHighlights,
-} from './budget.js?v=202611100133';
+} from './budget.js?v=202611100208';
 
 const CELL = 10000; // 칸 그림의 한 칸: 100억 원(백만원 단위)
 
@@ -130,6 +131,14 @@ function update() {
   });
 }
 
+// 열린재정 사업설명자료 링크. 옆의 열어 본 횟수는 clicks.js가 채운다.
+function sourceLink(item) {
+  const link = el('a', { className: 'detail source-link', href: item.url, target: '_blank', rel: 'noopener' },
+    '열린재정 사업설명자료 ↓', el('span', { className: 'click-count' }));
+  if (item.id) link.dataset.itemId = item.id;
+  return link;
+}
+
 function itemTable(category) {
   const rows = category.items.map((item) =>
     el('tr', {},
@@ -138,7 +147,7 @@ function itemTable(category) {
         item.detail ? el('span', { className: 'detail', textContent: item.detail }) : null,
         item.category ? el('span', { className: 'detail', textContent: `정부 분류: ${item.category}` }) : null,
         // 사업 상세(목적·근거·내역·산출)는 원본으로 보낸다: 열린재정 사업설명자료 파일(budget.json의 url).
-        item.url ? el('a', { className: 'detail source-link', href: item.url, target: '_blank', rel: 'noopener', textContent: '열린재정 사업설명자료 ↓' }) : null,
+        item.url ? sourceLink(item) : null,
       ),
       el('td', { className: 'num', textContent: won(item.amounts[prevYear()]) }),
       el('td', { className: 'num', textContent: won(item.amounts[data.baseYear]) }),
@@ -605,6 +614,7 @@ async function start() {
   update();
   setupTooltip();
   setupSwitch();
+  setupClicks(data.id);
   const summary = document.getElementById('summary');
   new ResizeObserver(() => {
     document.documentElement.style.setProperty('--summary-height', `${summary.offsetHeight}px`);

@@ -2,8 +2,8 @@
 // 데스크톱은 GNB의 사이트 이름, 휴대폰은 합계 띠(홈)와 페이지 제목 위(시민 예산안·시민 심의)의 부처 이름이 버튼이 된다.
 // <html data-campaign-switch>가 있는 페이지에서만 켠다(새 캠페인을 붙일 때 공개 전까지 끌 수 있게).
 
-import { el, closeButton } from './dom.js?v=202611100133';
-import { CAMPAIGNS, campaignId, data, won, sum } from './budget.js?v=202611100133';
+import { el, closeButton } from './dom.js?v=202611100208';
+import { CAMPAIGNS, campaignId, data, won, sum } from './budget.js?v=202611100208';
 
 // 캠페인마다 같은 이름으로 있는 페이지. 옮겨 갈 때 보던 페이지를 그대로 연다.
 const PAGES = ['', 'budgets/', 'deliberation/'];

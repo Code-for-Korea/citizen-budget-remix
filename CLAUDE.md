@@ -25,6 +25,7 @@
 - 운영 프로젝트: `citizen-budget`(id `jtqvvvfglxroiidzwgwr`). 글 종류는 `question`(질문)·`proposal`(제안)·`budget`(시민 예산안)입니다. 대상은 `category_id`에 담습니다(빈 값은 예산안 전체, `group:이름`은 대분류, 그 밖은 분야 id).
 - 스키마를 바꿀 때는 `supabase/migrations/`에 SQL 파일을 더하고, 운영 DB에도 같은 SQL을 적용합니다. 적용 전에 글이 있는지 확인하고, 있으면 옮기는 SQL을 함께 넣습니다.
 - 대분류 이름을 바꾸면 그 이름으로 남긴 대분류 대상 글(`group:이름`)이 목록에서 빠지므로 DB의 값도 함께 옮깁니다.
+- `source_clicks` 표는 세부사업의 「열린재정 사업설명자료」 링크를 열어 본 횟수입니다(캠페인·열린재정 사업 ID별, 누가 눌렀는지는 남기지 않음). 쓰기는 `count_source_click()` 함수로만 1씩 하고, 한 브라우저에서 같은 사업은 하루 한 번만 셉니다(`src/clicks.js`). 로그인 없이 세는 숫자라 화면에서는 '열어 본 횟수'로만 씁니다.
 
 ## 확인
 

@@ -76,6 +76,7 @@ campaigns/ai-2027/descriptions.json  출처·분류 설명 (사람이 쓴다)
 campaigns/mcst-2027/             문화체육관광부 2027년 예산 데이터 (열린재정에서 만듦, /mcst/에서 씀)
 mcst/                           문화체육관광부 예산 페이지 세 개
 src/switch.js                   부처 바꾸기(부처 이름을 누르면 시트)
+src/clicks.js                   열린재정 사업설명자료 링크를 열어 본 횟수(Supabase source_clicks)
 scripts/openfiscal_to_json.py   열린재정 자료로 캠페인 데이터를 만듦
 scripts/add_openfiscal_links.py 세부사업에 열린재정 사업설명자료 링크를 닮
 scripts/xlsx_to_json.py         원자료 엑셀을 budget.json으로 변환

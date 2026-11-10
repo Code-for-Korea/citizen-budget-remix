@@ -1438,6 +1438,19 @@ td .source-link:hover {
   color: var(--red);
 }
 
+/* 열어 본 횟수는 링크 밑줄 밖에 회색으로 붙인다. */
+td .source-link .click-count {
+  display: inline-block;
+  margin-left: 0.5em;
+  color: var(--muted);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+td .source-link .click-count:empty {
+  display: none;
+}
+
 .tip {
   position: fixed;
   z-index: 2;
