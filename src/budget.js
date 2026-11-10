@@ -8,12 +8,12 @@
 export const CAMPAIGNS = {
   'ai-2027': {
     name: '과학기술정보통신부 AI 예산',
-    data: new URL('../campaigns/ai-2027/budget.json?v=202611032354', import.meta.url),
+    data: new URL('../campaigns/ai-2027/budget.json?v=202611100108', import.meta.url),
     home: new URL('../', import.meta.url),
   },
   'mcst-2027': {
     name: '문화체육관광부 예산',
-    data: new URL('../campaigns/mcst-2027/budget.json?v=202611032354', import.meta.url),
+    data: new URL('../campaigns/mcst-2027/budget.json?v=202611100108', import.meta.url),
     home: new URL('../mcst/', import.meta.url),
   },
 };

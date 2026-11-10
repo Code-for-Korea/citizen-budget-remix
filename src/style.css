@@ -1427,6 +1427,17 @@ td .detail {
   color: var(--muted);
 }
 
+td .source-link {
+  width: fit-content;
+  font-size: 0.85em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+td .source-link:hover {
+  color: var(--red);
+}
+
 .tip {
   position: fixed;
   z-index: 2;
