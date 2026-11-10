@@ -26,3 +26,6 @@ Thumbs.db
 /*.png
 !/og.png
 !/apple-touch-icon.png
+
+# 파이썬 캐시
+__pycache__/
