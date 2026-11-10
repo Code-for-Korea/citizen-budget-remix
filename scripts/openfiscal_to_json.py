@@ -74,7 +74,8 @@ def read_amounts(path):
         if line.startswith("끝"):
             continue
         cells = dict(zip(header, line.split("\t")))
-        number = lambda key: int(cells[key].replace(",", "")) if cells.get(key, "").strip() else None
+        # 원문 값 몇 개는 소수점이 있다(예: 3,582.1). 화면 단위(억)에 영향이 없도록 백만원 정수로 반올림한다.
+        number = lambda key: round(float(cells[key].replace(",", ""))) if cells.get(key, "").strip() else None
         table[cells["사업ID"].strip()] = {
             "2025": number("2025결산"),
             "2026": number("2026본예산"),
@@ -171,6 +172,8 @@ def main(list_path, amounts_path, out_dir):
             "분야 설명은 세부사업 이름으로 자동으로 만든 초안이며, 정부 공식 설명이 아닙니다.",
             f"회계·기금 사이 전출금과 여유자금 예치 같은 내부거래·보전지출 {len(internal)}건"
             f"(2027년 정부안 {won(internal_total)} 원)은 사업이 아니라 돈이 오가는 장부라 뺐습니다.",
+            "2026년 금액은 열린재정 설명자료에 적힌 그대로입니다. 일부 기금 사업(예: 관광산업 융자지원)은 "
+            "국회에 제출된 다른 자료와 2026년 금액이 달라 확인하고 있습니다.",
             "세부사업 표의 「열린재정 사업설명자료」 링크는 그 사업의 설명자료 파일(hwpx)을 열린재정에서 바로 내려받습니다.",
             f"합계 {won(spend_total + fund_total)} 원은 {OFFICE} 총지출 {won(spend_total)} 원에 "
             f"기획예산처 소관 미래대응기금으로 편성된 {OFFICE} 사업 {won(fund_total)} 원을 더한 값입니다.",

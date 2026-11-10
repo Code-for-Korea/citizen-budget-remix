@@ -1,10 +1,10 @@
 // 시민 예산안·심의 페이지: 캠페인 자료를 불러온 뒤 게시판 목록을 채운다.
 // 예산을 짜는 화면은 홈에 있으므로, 불러오기와 반영은 홈으로 옮겨 가서 한다.
 
-import { setupBoard } from './board.js?v=202611100108';
-import { loadCampaign, mergeBudget, SAVED_KEY } from './budget.js?v=202611100108';
-import { setupShare } from './share.js?v=202611100108';
-import { setupSwitch } from './switch.js?v=202611100108';
+import { setupBoard } from './board.js?v=202611100115';
+import { loadCampaign, mergeBudget, SAVED_KEY } from './budget.js?v=202611100115';
+import { setupShare } from './share.js?v=202611100115';
+import { setupSwitch } from './switch.js?v=202611100115';
 
 // 홈이 기억해 둔 마지막 예산(budget.js의 SAVED_KEY).
 function saved() {
