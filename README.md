@@ -74,7 +74,7 @@ supabase/migrations/            게시판 DB 스키마와 권한 규칙(SQL)
 campaigns/ai-2027/budget.json   2027년 AI 예산 데이터 (변환 스크립트가 만든다)
 campaigns/ai-2027/descriptions.json  출처·분류 설명 (사람이 쓴다)
 campaigns/mcst-2027/             문화체육관광부 2027년 예산 데이터 (열린재정에서 만듦, /mcst/에서 씀)
-mcst/                           문화체육관광부 예산 페이지 세 개 (아직 검색 제외)
+mcst/                           문화체육관광부 예산 페이지 세 개
 src/switch.js                   부처 바꾸기(부처 이름을 누르면 시트)
 scripts/openfiscal_to_json.py   열린재정 자료로 캠페인 데이터를 만듦
 scripts/add_openfiscal_links.py 세부사업에 열린재정 사업설명자료 링크를 닮
@@ -92,11 +92,11 @@ python3 scripts/xlsx_to_json.py <원자료.xlsx> campaigns/ai-2027/budget.json
 
 금액은 열린재정의 「세부사업 예산편성현황(총지출)」(2027년 정부안, 합계 820.9조 원)과 대조했습니다. 대조로 알아낸 값(미래대응기금으로 편성된 금액, 다른 곳의 AI 관련 사업)은 `descriptions.json`의 `crosscheck`에 사람이 적고, 변환 스크립트가 `budget.json`으로 그대로 옮깁니다. 열린재정 파일은 저장소에 넣지 않습니다.
 
-### 다른 캠페인 붙이기 (문체부 테스트)
+### 다른 캠페인 붙이기 (문화체육관광부)
 
 페이지의 `<html data-campaign="mcst-2027">`이 읽을 캠페인을 정합니다(없으면 `ai-2027`). 캠페인의 이름(「문화체육관광부 예산」)·데이터·홈 주소는 `src/budget.js`의 `CAMPAIGNS`에 적습니다. 같은 `<html>`의 `data-ministry`·`data-share-text`가 화면 문구와 공유 문장을 캠페인에 맞춥니다. `<html data-campaign-switch>`가 있는 페이지는 부처 이름(`data-scope-switch` 자리와 GNB의 사이트 이름)을 눌러 다른 부처 예산으로 옮겨 갈 수 있습니다(`src/switch.js`). AI 사이트와 문화체육관광부 페이지 모두 켜 두었습니다. 게시판 글은 캠페인 id(`posts.campaign`)로 나뉘어 다른 캠페인 화면에는 보이지 않고, 기억해 둔 내 예산도 캠페인마다 따로 둡니다.
 
-`/mcst/`는 문화체육관광부 2027년 예산 정부안입니다(아직 `noindex`, 화면에 「테스트 버전」 표기). 데이터(`campaigns/mcst-2027/`)는 기획예산처 열린재정 「재정사업별 상세설명자료」로 만듭니다. 원자료 파일은 저장소에 넣지 않습니다.
+`/mcst/`는 문화체육관광부 2027년 예산 정부안입니다. 데이터(`campaigns/mcst-2027/`)는 기획예산처 열린재정 「재정사업별 상세설명자료」로 만듭니다. 원자료 파일은 저장소에 넣지 않습니다.
 
 ```bash
 # 목록: 열린재정 세부사업 목록 API 응답(JSON), 연도별 금액: 사업설명자료 예산 총괄표에서 뽑은 탭 구분 텍스트

@@ -1,9 +1,9 @@
 // 부처 바꾸기: 지금 보는 부처 이름을 누르면 아래에서 시트가 올라와 다른 부처 예산으로 옮겨 간다.
 // 데스크톱은 GNB의 사이트 이름, 휴대폰은 합계 띠(홈)와 페이지 제목 위(시민 예산안·시민 심의)의 부처 이름이 버튼이 된다.
-// 공개 전 캠페인이 공개 페이지에 드러나지 않도록, <html data-campaign-switch>가 있는 페이지에서만 켠다.
+// <html data-campaign-switch>가 있는 페이지에서만 켠다(새 캠페인을 붙일 때 공개 전까지 끌 수 있게).
 
-import { el, closeButton } from './dom.js?v=202611100115';
-import { CAMPAIGNS, campaignId, data, won, sum } from './budget.js?v=202611100115';
+import { el, closeButton } from './dom.js?v=202611100133';
+import { CAMPAIGNS, campaignId, data, won, sum } from './budget.js?v=202611100133';
 
 // 캠페인마다 같은 이름으로 있는 페이지. 옮겨 갈 때 보던 페이지를 그대로 연다.
 const PAGES = ['', 'budgets/', 'deliberation/'];
